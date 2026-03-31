@@ -2803,10 +2803,10 @@
             </div>
           </div>
           <div class="form-row">
-            <div class="form-group">
+            <div class="form-group" style="position:relative;">
               <label>City / Place of Birth *</label>
-              <input type="text" id="k-city" placeholder="Type city name…" list="k-cityList" autocomplete="off" />
-              <datalist id="k-cityList"></datalist>
+              <input type="text" id="k-city" placeholder="Type any city worldwide…" autocomplete="off" />
+              <div id="k-city-suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--dark);border-radius:0 0 10px 10px;max-height:220px;overflow-y:auto;z-index:9999;box-shadow:0 8px 20px rgba(44,32,85,0.15);"></div>
             </div>
           </div>
           <input type="hidden" id="k-lat" />
@@ -3436,35 +3436,77 @@
 
     /* ══ KUNDALI API ══ */
     const K_PROXY = '/.netlify/functions/astrology-proxy';
-    let kCitiesMap = {};
 
-    fetch('locations.json').then(r=>r.json()).then(data=>{
-      const dl=document.getElementById('k-cityList');
-      data.countries.forEach(c=>c.states.forEach(s=>s.cities.forEach(city=>{
-        kCitiesMap[city.name]={lat:city.lat,lon:city.lon,tz:typeof city.timezone==='number'?city.timezone:5.5};
-        const opt=document.createElement('option');opt.value=city.name;dl.appendChild(opt);
-      })));
-    }).catch(()=>{
-      [['Hyderabad',17.385,78.4867],['Mumbai',19.076,72.8777],['Delhi',28.6139,77.209],
-       ['Bangalore',12.9716,77.5946],['Chennai',13.0827,80.2707],['Kolkata',22.5726,88.3639],
-       ['Pune',18.5204,73.8567],['Hanumkonda',17.3603,78.7468],['Vijayawada',16.5062,80.648],
-       ['Visakhapatnam',17.6869,83.2185],['Tirupati',13.1939,79.8711]
-      ].forEach(([n,la,lo])=>{
-        kCitiesMap[n]={lat:la,lon:lo,tz:5.5};
-        const dl=document.getElementById('k-cityList');
-        const opt=document.createElement('option');opt.value=n;dl.appendChild(opt);
-      });
-    });
+    // ── Live city search via OpenStreetMap Nominatim (any city worldwide) ──
+    let kSearchTimer = null;
+    let kSelectedCity = null; // stores { name, lat, lon, tz }
 
-    document.getElementById('k-city').addEventListener('change', kFillCoords);
-    document.getElementById('k-city').addEventListener('blur', kFillCoords);
-    function kFillCoords(){
-      const v=document.getElementById('k-city').value.trim();
-      let d=kCitiesMap[v]||Object.entries(kCitiesMap).find(([k])=>k.toLowerCase()===v.toLowerCase())?.[1];
-      if(d){document.getElementById('k-lat').value=d.lat;document.getElementById('k-lon').value=d.lon;document.getElementById('k-tz').value=d.tz;}
+    function tzFromLon(lon) {
+      // Approximate timezone offset from longitude
+      return Math.round(lon / 15 * 2) / 2;
     }
 
-    const K_LUCKY={
+    document.getElementById('k-city').addEventListener('input', function() {
+      const q = this.value.trim();
+      const box = document.getElementById('k-city-suggestions');
+      kSelectedCity = null;
+      document.getElementById('k-lat').value = '';
+      document.getElementById('k-lon').value = '';
+      document.getElementById('k-tz').value = '';
+      if (q.length < 2) { box.style.display = 'none'; return; }
+      clearTimeout(kSearchTimer);
+      kSearchTimer = setTimeout(() => kSearchCity(q), 350);
+    });
+
+    document.getElementById('k-city').addEventListener('blur', function() {
+      setTimeout(() => { document.getElementById('k-city-suggestions').style.display = 'none'; }, 200);
+    });
+
+    async function kSearchCity(q) {
+      const box = document.getElementById('k-city-suggestions');
+      box.innerHTML = '<div style="padding:10px 14px;color:#888;font-size:.88em;">Searching…</div>';
+      box.style.display = 'block';
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=8&addressdetails=1`;
+        const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+        const results = await res.json();
+        if (!results.length) {
+          box.innerHTML = '<div style="padding:10px 14px;color:#888;font-size:.88em;">No results found</div>';
+          return;
+        }
+        box.innerHTML = results.map((r, i) => {
+          const label = r.display_name;
+          const lat = parseFloat(r.lat);
+          const lon = parseFloat(r.lon);
+          const tz = tzFromLon(lon);
+          return `<div class="k-city-opt" data-lat="${lat}" data-lon="${lon}" data-tz="${tz}" data-label="${label.replace(/"/g,'&quot;')}"
+            style="padding:10px 14px;cursor:pointer;font-size:.88em;border-bottom:1px solid #f0eaff;line-height:1.4;transition:background .15s;"
+            onmouseover="this.style.background='#f0eaff'" onmouseout="this.style.background=''"
+            onclick="kSelectCity(this)">
+            📍 ${label}
+          </div>`;
+        }).join('');
+      } catch(e) {
+        box.innerHTML = '<div style="padding:10px 14px;color:#c0392b;font-size:.88em;">Search failed. Check connection.</div>';
+      }
+    }
+
+    function kSelectCity(el) {
+      const label = el.getAttribute('data-label');
+      const lat   = parseFloat(el.getAttribute('data-lat'));
+      const lon   = parseFloat(el.getAttribute('data-lon'));
+      const tz    = parseFloat(el.getAttribute('data-tz'));
+      // Use short name (first part before comma)
+      const shortName = label.split(',')[0].trim();
+      document.getElementById('k-city').value = shortName;
+      document.getElementById('k-lat').value  = lat;
+      document.getElementById('k-lon').value  = lon;
+      document.getElementById('k-tz').value   = tz;
+      document.getElementById('k-city-suggestions').style.display = 'none';
+      kSelectedCity = { name: shortName, fullName: label, lat, lon, tz };
+    }
+
+    const K_LUCKY = {
       'Aries':      {num:'9',color:'Red, Orange',gem:'Red Coral',metal:'Copper',day:'Tuesday',deity:'Hanuman',dir:'South',mantra:'Om Angarakaya Namaha',friend:'Sun, Jupiter',avoid:'Saturn, Venus'},
       'Taurus':     {num:'6',color:'White, Pink',gem:'Diamond',metal:'Silver',day:'Friday',deity:'Lakshmi',dir:'South-East',mantra:'Om Shukraya Namaha',friend:'Mercury, Saturn',avoid:'Sun, Moon'},
       'Gemini':     {num:'5',color:'Green, Yellow',gem:'Emerald',metal:'Gold',day:'Wednesday',deity:'Vishnu',dir:'North',mantra:'Om Budhaya Namaha',friend:'Venus, Saturn',avoid:'Mars, Jupiter'},
@@ -3486,145 +3528,250 @@
     }
 
     async function generateKundali() {
-      const name=document.getElementById('k-name').value.trim();
-      const dobRaw=document.getElementById('k-dob').value;
-      const tobRaw=document.getElementById('k-tob').value;
-      const city=document.getElementById('k-city').value.trim();
-      const lat=parseFloat(document.getElementById('k-lat').value);
-      const lon=parseFloat(document.getElementById('k-lon').value);
-      const tzone=parseFloat(document.getElementById('k-tz').value);
-      const errEl=document.getElementById('k-error');
-      errEl.style.display='none';
-      const errs=[];
-      if(!name)errs.push('Full Name required');
-      if(!dobRaw)errs.push('Date of Birth required');
-      if(!tobRaw)errs.push('Time of Birth required');
-      if(!city)errs.push('City required');
-      if(isNaN(lat))errs.push('Select city from suggestions to get coordinates');
-      if(errs.length){errEl.textContent=errs.join(' • ');errEl.style.display='block';return;}
-      const[y,mo,d]=dobRaw.split('-').map(Number);
-      const[h,mi]=tobRaw.split(':').map(Number);
-      document.getElementById('kundaliImages').style.display='none';
+      const name   = document.getElementById('k-name').value.trim();
+      const dobRaw = document.getElementById('k-dob').value;
+      const tobRaw = document.getElementById('k-tob').value;
+      const city   = document.getElementById('k-city').value.trim();
+      const lat    = parseFloat(document.getElementById('k-lat').value);
+      const lon    = parseFloat(document.getElementById('k-lon').value);
+      const tzone  = parseFloat(document.getElementById('k-tz').value);
+      const errEl  = document.getElementById('k-error');
+      errEl.style.display = 'none';
+
+      const errs = [];
+      if (!name)    errs.push('Full Name required');
+      if (!dobRaw)  errs.push('Date of Birth required');
+      if (!tobRaw)  errs.push('Time of Birth required');
+      if (!city)    errs.push('City required — type and select from dropdown');
+      if (isNaN(lat)) errs.push('Select a city from the dropdown suggestions');
+      if (errs.length) { errEl.textContent = errs.join(' • '); errEl.style.display = 'block'; return; }
+
+      const [y, mo, d] = dobRaw.split('-').map(Number);
+      const [h, mi]    = tobRaw.split(':').map(Number);
+
+      document.getElementById('kundaliImages').style.display = 'none';
       document.getElementById('kundaliLoading').classList.add('visible');
-      document.getElementById('kundaliReport').style.display='none';
-      try{
-        const b={day:d,month:mo,year:y,hour:h,min:mi,lat,lon,tzone};
-        const p=ep=>kProxy(ep,b);
-        const[birthDet,astroDet,planets,dasha,manglik,sadeSati,panchang,yoga,kalsarpa,ascRep,moonRep,chartD1,chartD9]=await Promise.all([
-          p('birth_details').catch(()=>({})),p('astro_details').catch(()=>({})),
-          p('planets').catch(()=>[]),p('major_vdasha').catch(()=>[]),
-          p('manglik').catch(()=>({})),p('sadhesati_current_status').catch(()=>({})),
-          p('basic_panchang').catch(()=>({})),p('yoga_details').catch(()=>null),
-          p('kalsarpa_details').catch(()=>null),p('ascendant_report').catch(()=>null),
+      document.getElementById('kundaliReport').style.display = 'none';
+
+      try {
+        const b = { day:d, month:mo, year:y, hour:h, min:mi, lat, lon, tzone };
+        const p = ep => kProxy(ep, b);
+
+        const [birthDet, astroDet, planets, dasha, subDasha, manglik, sadeSati, panchang, yoga, kalsarpa, ascRep, moonRep, sunRep, chartD1, chartD9, chartChalit] = await Promise.all([
+          p('birth_details').catch(()=>({})),
+          p('astro_details').catch(()=>({})),
+          p('planets').catch(()=>[]),
+          p('major_vdasha').catch(()=>[]),
+          p('sub_vdasha').catch(()=>null),
+          p('manglik').catch(()=>({})),
+          p('sadhesati_current_status').catch(()=>({})),
+          p('basic_panchang').catch(()=>({})),
+          p('yoga_details').catch(()=>null),
+          p('kalsarpa_details').catch(()=>null),
+          p('ascendant_report').catch(()=>null),
           p('planet_report/moon').catch(()=>null),
-          p('horo_chart_image/D1').catch(()=>null),p('horo_chart_image/D9').catch(()=>null)
+          p('planet_report/sun').catch(()=>null),
+          p('horo_chart_image/D1').catch(()=>null),
+          p('horo_chart_image/D9').catch(()=>null),
+          p('horo_chart_image/chalit').catch(()=>null),
         ]);
-        const rashi=kVal(astroDet,'moon_sign','rashi')||'Aries';
-        const lagna=kVal(astroDet,'rising_sign','ascendant','lagna');
-        const nak=kVal(astroDet,'nakshatra','nakshatra_name');
-        const lf=K_LUCKY[rashi]||K_LUCKY['Aries'];
-        const isManglik=manglik.isManglik||manglik.manglik_status||manglik.is_manglik;
-        const isSS=sadeSati.inSadeSati||sadeSati.is_in_sade_sati;
-        const isKS=kalsarpa&&(kalsarpa.present||kalsarpa.kalsarpa_present);
-        const svg=r=>r?(typeof r==='string'?r:(r.svg||r.chart_image||r.response||'')):'';
-        document.getElementById('kundaliReport').innerHTML=`
-          <div style="background:linear-gradient(135deg,var(--dark),#4a3580);color:#fff;border-radius:14px;padding:20px 24px;margin-bottom:20px;text-align:center;">
-            <h3 style="font-family:'Cinzel',serif;font-size:1.3em;margin-bottom:4px;">🔮 ${name}'s Vedic Kundali</h3>
-            <p style="opacity:.85;font-size:.9em;">${d}-${String(mo).padStart(2,'0')}-${y} | ${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')} | ${city}</p>
+
+        const rashi  = kVal(astroDet, 'moon_sign','rashi') || 'Aries';
+        const lagna  = kVal(astroDet, 'rising_sign','ascendant','lagna');
+        const nak    = kVal(astroDet, 'nakshatra','nakshatra_name');
+        const lf     = K_LUCKY[rashi] || K_LUCKY['Aries'];
+        const isManglik  = manglik.isManglik || manglik.manglik_status || manglik.is_manglik;
+        const isSS       = sadeSati.inSadeSati || sadeSati.is_in_sade_sati;
+        const isKS       = kalsarpa && (kalsarpa.present || kalsarpa.kalsarpa_present);
+        const svgOf = r  => r ? (typeof r==='string' ? r : (r.svg||r.chart_image||r.response||'')) : '';
+
+        const fullLocation = kSelectedCity ? kSelectedCity.fullName : city;
+
+        document.getElementById('kundaliReport').innerHTML = `
+          <!-- Header -->
+          <div style="background:linear-gradient(135deg,var(--dark),#4a3580);color:#fff;border-radius:14px;padding:22px 26px;margin-bottom:20px;text-align:center;">
+            <div style="font-size:2rem;margin-bottom:6px;">🔮</div>
+            <h3 style="font-family:'Cinzel',serif;font-size:1.4em;margin-bottom:6px;">${name}'s Vedic Kundali</h3>
+            <p style="opacity:.85;font-size:.88em;">${String(d).padStart(2,'0')}-${String(mo).padStart(2,'0')}-${y} &nbsp;|&nbsp; ${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')} &nbsp;|&nbsp; ${fullLocation}</p>
+            <p style="opacity:.7;font-size:.78em;margin-top:4px;">Lat: ${lat.toFixed(4)}° | Lon: ${lon.toFixed(4)}° | Timezone: UTC+${tzone}</p>
           </div>
+
+          <!-- Birth Details -->
+          <div class="k-section">📋 Birth Details</div>
+          <div class="k-card"><div class="k-grid">
+            <div class="k-item"><div class="k-label">Full Name</div><div class="k-value">${name}</div></div>
+            <div class="k-item"><div class="k-label">Date of Birth</div><div class="k-value">${String(d).padStart(2,'0')}-${String(mo).padStart(2,'0')}-${y}</div></div>
+            <div class="k-item"><div class="k-label">Time of Birth</div><div class="k-value">${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}</div></div>
+            <div class="k-item"><div class="k-label">Place of Birth</div><div class="k-value">${fullLocation}</div></div>
+            <div class="k-item"><div class="k-label">Sunrise</div><div class="k-value">${kVal(birthDet,'sunrise')}</div></div>
+            <div class="k-item"><div class="k-label">Sunset</div><div class="k-value">${kVal(birthDet,'sunset')}</div></div>
+            <div class="k-item"><div class="k-label">Ayanamsa</div><div class="k-value">${parseFloat(birthDet.ayanamsha||0).toFixed(4)}°</div></div>
+            <div class="k-item"><div class="k-label">Timezone</div><div class="k-value">UTC+${tzone}</div></div>
+          </div></div>
+
+          <!-- Key Indicators -->
           <div class="k-section">⭐ Key Indicators</div>
           <div class="k-card"><div class="k-grid">
             <div class="k-item"><div class="k-label">Lagna (Ascendant)</div><div class="k-value">${lagna}</div></div>
             <div class="k-item"><div class="k-label">Rashi (Moon Sign)</div><div class="k-value">${rashi}</div></div>
-            <div class="k-item"><div class="k-label">Nakshatra</div><div class="k-value">${nak}</div></div>
-            <div class="k-item"><div class="k-label">Sunrise</div><div class="k-value">${kVal(birthDet,'sunrise')}</div></div>
-            <div class="k-item"><div class="k-label">Sunset</div><div class="k-value">${kVal(birthDet,'sunset')}</div></div>
-            <div class="k-item"><div class="k-label">Ayanamsa</div><div class="k-value">${parseFloat(birthDet.ayanamsha||0).toFixed(2)}°</div></div>
+            <div class="k-item"><div class="k-label">Nakshatra (Birth Star)</div><div class="k-value">${nak}</div></div>
           </div></div>
-          <div class="k-section">🗓️ Panchang</div>
+
+          <!-- Panchang -->
+          <div class="k-section">🗓️ Panchang (Birth Day Details)</div>
           <div class="k-card"><div class="k-grid">
-            <div class="k-item"><div class="k-label">Tithi</div><div class="k-value">${kVal(panchang,'tithi','tithi_name')}</div></div>
-            <div class="k-item"><div class="k-label">Vara</div><div class="k-value">${kVal(panchang,'vara','day','vaara')}</div></div>
+            <div class="k-item"><div class="k-label">Tithi (Lunar Day)</div><div class="k-value">${kVal(panchang,'tithi','tithi_name')}</div></div>
+            <div class="k-item"><div class="k-label">Vara (Weekday)</div><div class="k-value">${kVal(panchang,'vara','day','vaara')}</div></div>
             <div class="k-item"><div class="k-label">Nakshatra</div><div class="k-value">${kVal(panchang,'nakshatra','nakshatra_name')}</div></div>
             <div class="k-item"><div class="k-label">Yoga</div><div class="k-value">${kVal(panchang,'yoga','yoga_name')}</div></div>
             <div class="k-item"><div class="k-label">Karana</div><div class="k-value">${kVal(panchang,'karana','karana_name')}</div></div>
           </div></div>
-          ${(svg(chartD1)||svg(chartD9))?`
+
+          <!-- Charts -->
+          ${(svgOf(chartD1)||svgOf(chartD9)||svgOf(chartChalit)) ? `
           <div class="k-section">🔯 Kundali Charts</div>
           <div class="k-card"><div class="k-charts">
-            ${svg(chartD1)?`<div class="k-chart-box"><h4>D1 — Lagna Chart</h4><div>${svg(chartD1)}</div></div>`:''}
-            ${svg(chartD9)?`<div class="k-chart-box"><h4>D9 — Navamsa Chart</h4><div>${svg(chartD9)}</div></div>`:''}
-          </div></div>`:''}
+            ${svgOf(chartD1)?`<div class="k-chart-box"><h4>D1 — Lagna Chart (Birth Chart)</h4><div>${svgOf(chartD1)}</div></div>`:''}
+            ${svgOf(chartD9)?`<div class="k-chart-box"><h4>D9 — Navamsa Chart</h4><div>${svgOf(chartD9)}</div></div>`:''}
+            ${svgOf(chartChalit)?`<div class="k-chart-box"><h4>Chalit — House Chart</h4><div>${svgOf(chartChalit)}</div></div>`:''}
+          </div></div>` : ''}
+
+          <!-- Planetary Positions -->
           <div class="k-section">🪐 Planetary Positions</div>
-          <div class="k-card" style="overflow-x:auto;"><table>
-            <thead><tr><th>Planet</th><th>Sign</th><th>Degree</th><th>Nakshatra</th><th>House</th><th>Retro</th></tr></thead>
-            <tbody>${kArr(planets,'planets','data').map(p=>`<tr>
-              <td><strong>${kVal(p,'name','planet')}</strong></td><td>${kVal(p,'sign','rashi')}</td>
-              <td>${parseFloat(p.fullDegree||p.full_degree||0).toFixed(2)}°</td>
-              <td>${kVal(p,'nakshatra','nakshatra_name')}</td><td>${kVal(p,'house')}</td>
-              <td class="${(p.isRetro==='true'||p.isRetro===true)?'red':'green'}">${(p.isRetro==='true'||p.isRetro===true)?'℞':'—'}</td>
-            </tr>`).join('')}</tbody>
-          </table></div>
-          ${yoga?`<div class="k-section">✨ Yoga Analysis</div><div class="k-card">
-            ${kArr(yoga,'yogas','yoga_list','data').length?kArr(yoga,'yogas','yoga_list','data').map(y=>`
-              <div class="k-yoga"><strong>${kVal(y,'name','yoga_name')}</strong><p>${kVal(y,'description','result','effect')}</p></div>`).join('')
-            :'<p style="color:#888;font-size:.9em;">No major yogas detected.</p>'}
+          <div class="k-card" style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Planet</th><th>Sign (Rashi)</th><th>Degree</th><th>Nakshatra</th><th>House</th><th>Retro</th></tr></thead>
+              <tbody>${kArr(planets,'planets','data').map(pl=>`<tr>
+                <td><strong>${kVal(pl,'name','planet')}</strong></td>
+                <td>${kVal(pl,'sign','rashi')}</td>
+                <td>${parseFloat(pl.fullDegree||pl.full_degree||pl.normDegree||0).toFixed(2)}°</td>
+                <td>${kVal(pl,'nakshatra','nakshatra_name')}</td>
+                <td>${kVal(pl,'house')}</td>
+                <td class="${(pl.isRetro==='true'||pl.isRetro===true)?'red':'green'}">${(pl.isRetro==='true'||pl.isRetro===true)?'℞ Yes':'—'}</td>
+              </tr>`).join('')}</tbody>
+            </table>
+          </div>
+
+          <!-- Yoga Analysis -->
+          ${yoga?`
+          <div class="k-section">✨ Yoga Analysis</div>
+          <div class="k-card">
+            ${kArr(yoga,'yogas','yoga_list','data').length
+              ? kArr(yoga,'yogas','yoga_list','data').map(yg=>`
+                  <div class="k-yoga">
+                    <strong>${kVal(yg,'name','yoga_name')}</strong>
+                    <p>${kVal(yg,'description','result','effect')}</p>
+                  </div>`).join('')
+              : '<p style="color:#888;font-size:.9em;">No major yogas detected for this chart.</p>'}
           </div>`:''}
-          <div class="k-section">📅 Vimshottari Dasha</div>
-          <div class="k-card" style="overflow-x:auto;"><table>
-            <thead><tr><th>Mahadasha</th><th>Start</th><th>End</th><th>Duration</th></tr></thead>
-            <tbody>${kArr(dasha,'dashas','major_vdasha','data').map(d=>`<tr>
-              <td><strong>${kVal(d,'lord','planet','name')}</strong></td>
-              <td>${kVal(d,'startDate','start_date','start')}</td>
-              <td>${kVal(d,'endDate','end_date','end')}</td>
-              <td>${kVal(d,'years','duration','period')} yrs</td>
-            </tr>`).join('')}</tbody>
-          </table></div>
+
+          <!-- Vimshottari Dasha -->
+          <div class="k-section">📅 Vimshottari Dasha (Major Life Periods)</div>
+          <div class="k-card" style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Mahadasha Lord</th><th>Start Date</th><th>End Date</th><th>Duration</th></tr></thead>
+              <tbody>${kArr(dasha,'dashas','major_vdasha','data').map(ds=>`<tr>
+                <td><strong>${kVal(ds,'lord','planet','name')}</strong></td>
+                <td>${kVal(ds,'startDate','start_date','start')}</td>
+                <td>${kVal(ds,'endDate','end_date','end')}</td>
+                <td>${kVal(ds,'years','duration','period')} yrs</td>
+              </tr>`).join('')}</tbody>
+            </table>
+          </div>
+
+          <!-- Antardasha -->
+          ${subDasha&&kArr(subDasha,'sub_periods','antardashas','data').length?`
+          <div class="k-section">📅 Antardasha (Sub-Periods)</div>
+          <div class="k-card" style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Mahadasha</th><th>Antardasha</th><th>Start</th><th>End</th></tr></thead>
+              <tbody>${kArr(subDasha,'sub_periods','antardashas','data').map(sd=>`<tr>
+                <td><strong>${kVal(sd,'major_lord','mahadasha','maha_lord')}</strong></td>
+                <td><strong>${kVal(sd,'lord','antardasha','antar_lord','planet')}</strong></td>
+                <td>${kVal(sd,'startDate','start_date','start')}</td>
+                <td>${kVal(sd,'endDate','end_date','end')}</td>
+              </tr>`).join('')}</tbody>
+            </table>
+          </div>`:''}
+
+          <!-- Dosha Analysis -->
           <div class="k-section">⚠️ Dosha Analysis</div>
           <div class="k-card"><div class="k-grid">
-            <div class="k-item"><div class="k-label">Manglik Dosha</div><div class="k-value ${isManglik?'red':'green'}">${isManglik?'⚠️ Present':'✅ Not Present'}</div></div>
-            <div class="k-item"><div class="k-label">Sade Sati</div><div class="k-value ${isSS?'red':'green'}">${isSS?'⚠️ Active':'✅ Not Active'}</div></div>
-            ${kalsarpa?`<div class="k-item"><div class="k-label">Kalsarpa Dosha</div><div class="k-value ${isKS?'red':'green'}">${isKS?'⚠️ Present':'✅ Not Present'}</div></div>`:''}
+            <div class="k-item">
+              <div class="k-label">Manglik Dosha</div>
+              <div class="k-value ${isManglik?'red':'green'}">${isManglik?'⚠️ Present':'✅ Not Present'}</div>
+              ${manglik.manglik_report?`<p style="font-size:.8em;color:#555;margin-top:4px;">${manglik.manglik_report}</p>`:''}
+            </div>
+            <div class="k-item">
+              <div class="k-label">Sade Sati</div>
+              <div class="k-value ${isSS?'red':'green'}">${isSS?'⚠️ Active':'✅ Not Active'}</div>
+            </div>
+            ${kalsarpa?`<div class="k-item">
+              <div class="k-label">Kalsarpa Dosha</div>
+              <div class="k-value ${isKS?'red':'green'}">${isKS?'⚠️ Present':'✅ Not Present'}</div>
+              ${(kalsarpa.type||kalsarpa.kalsarpa_type)?`<p style="font-size:.8em;color:#555;margin-top:4px;">Type: ${kalsarpa.type||kalsarpa.kalsarpa_type}</p>`:''}
+            </div>`:''}
           </div></div>
-          ${ascRep?`<div class="k-section">🌟 Ascendant Personality</div><div class="k-card"><p class="k-report-text">${kVal(ascRep,'report','description','result','asc_report')}</p></div>`:''}
-          ${moonRep?`<div class="k-section">🌙 Moon Report</div><div class="k-card"><p class="k-report-text">${kVal(moonRep,'report','description','result','moon_report')}</p></div>`:''}
+
+          <!-- Ascendant Report -->
+          ${ascRep?`
+          <div class="k-section">🌟 Lagna (Ascendant) Personality Report</div>
+          <div class="k-card"><p class="k-report-text">${kVal(ascRep,'report','description','result','asc_report')}</p></div>`:''}
+
+          <!-- Moon Report -->
+          ${moonRep?`
+          <div class="k-section">🌙 Moon (Chandra) Report</div>
+          <div class="k-card"><p class="k-report-text">${kVal(moonRep,'report','description','result','moon_report')}</p></div>`:''}
+
+          <!-- Sun Report -->
+          ${sunRep?`
+          <div class="k-section">☀️ Sun (Surya) Report</div>
+          <div class="k-card"><p class="k-report-text">${kVal(sunRep,'report','description','result','sun_report')}</p></div>`:''}
+
+          <!-- Lucky Factors -->
           <div class="k-section">🍀 Lucky Factors for ${rashi}</div>
           <div class="k-card"><div class="k-grid">
             <div class="k-item"><div class="k-label">🔢 Lucky Numbers</div><div class="k-value">${lf.num}</div></div>
             <div class="k-item"><div class="k-label">🎨 Lucky Colors</div><div class="k-value">${lf.color}</div></div>
-            <div class="k-item"><div class="k-label">💎 Gemstone</div><div class="k-value">${lf.gem}</div></div>
-            <div class="k-item"><div class="k-label">⚙️ Metal</div><div class="k-value">${lf.metal}</div></div>
+            <div class="k-item"><div class="k-label">💎 Lucky Gemstone</div><div class="k-value">${lf.gem}</div></div>
+            <div class="k-item"><div class="k-label">⚙️ Lucky Metal</div><div class="k-value">${lf.metal}</div></div>
             <div class="k-item"><div class="k-label">📅 Lucky Day</div><div class="k-value">${lf.day}</div></div>
-            <div class="k-item"><div class="k-label">🧭 Direction</div><div class="k-value">${lf.dir}</div></div>
-            <div class="k-item"><div class="k-label">🙏 Deity</div><div class="k-value">${lf.deity}</div></div>
+            <div class="k-item"><div class="k-label">🧭 Lucky Direction</div><div class="k-value">${lf.dir}</div></div>
+            <div class="k-item"><div class="k-label">🙏 Deity to Worship</div><div class="k-value">${lf.deity}</div></div>
             <div class="k-item"><div class="k-label">🕉️ Mantra</div><div class="k-value" style="font-size:.8em">${lf.mantra}</div></div>
             <div class="k-item"><div class="k-label">🤝 Friendly Planets</div><div class="k-value green">${lf.friend}</div></div>
-            <div class="k-item"><div class="k-label">⚠️ Avoid</div><div class="k-value red">${lf.avoid}</div></div>
+            <div class="k-item"><div class="k-label">⚠️ Avoid Planets</div><div class="k-value red">${lf.avoid}</div></div>
           </div></div>
-          <div class="k-section">🛕 Remedies</div>
+
+          <!-- Remedies -->
+          <div class="k-section">🛕 Remedies & Recommendations</div>
           <div class="k-card"><ul class="k-remedy">
             <li>🕉️ Chant daily: <strong>${lf.mantra}</strong></li>
-            <li>💎 Wear <strong>${lf.gem}</strong> in <strong>${lf.metal}</strong> on ${lf.day}</li>
-            <li>🎨 Prefer <strong>${lf.color}</strong> coloured clothes</li>
-            <li>🧭 Face <strong>${lf.dir}</strong> while working or praying</li>
-            <li>🙏 Pray to <strong>${lf.deity}</strong> on ${lf.day}</li>
-            ${isManglik?'<li>🔴 Manglik: Donate red lentils on Tuesdays · Recite Hanuman Chalisa</li>':''}
-            ${isSS?'<li>⚫ Sade Sati: Offer mustard oil to Shani Dev on Saturdays</li>':''}
-            ${isKS?'<li>🐍 Kalsarpa: Perform Kalsarpa puja at Trimbakeshwar or Ujjain</li>':''}
+            <li>💎 Wear <strong>${lf.gem}</strong> set in <strong>${lf.metal}</strong> on ${lf.day}</li>
+            <li>🎨 Prefer <strong>${lf.color}</strong> coloured clothes on lucky days</li>
+            <li>🧭 Face <strong>${lf.dir}</strong> direction while working or praying</li>
+            <li>🙏 Pray to <strong>${lf.deity}</strong> every ${lf.day}</li>
+            ${isManglik?'<li>🔴 <strong>Manglik:</strong> Donate red lentils on Tuesdays · Recite Hanuman Chalisa daily</li>':''}
+            ${isSS?'<li>⚫ <strong>Sade Sati:</strong> Offer mustard oil to Shani Dev on Saturdays · Wear iron ring on middle finger</li>':''}
+            ${isKS?'<li>🐍 <strong>Kalsarpa:</strong> Perform Kalsarpa puja at Trimbakeshwar or Ujjain temple</li>':''}
           </ul></div>
-          <div style="text-align:center;padding:14px 0;color:var(--muted);font-size:.78em;">✦ Powered by AstrologyAPI · ${new Date().toLocaleString()} ✦</div>
+
+          <div style="text-align:center;padding:16px 0 4px;color:var(--muted);font-size:.78em;border-top:1px solid var(--lavender);margin-top:16px;">
+            ✦ Powered by AstrologyAPI — Professional Vedic Calculations &nbsp;|&nbsp; Generated ${new Date().toLocaleString()} ✦
+          </div>
         `;
+
         document.getElementById('kundaliLoading').classList.remove('visible');
-        document.getElementById('kundaliReport').style.display='block';
-        document.getElementById('kundaliReport').scrollIntoView({behavior:'smooth',block:'start'});
-        showToast('✨ Kundali generated for '+name+'!');
-      }catch(err){
+        document.getElementById('kundaliReport').style.display = 'block';
+        document.getElementById('kundaliReport').scrollIntoView({ behavior:'smooth', block:'start' });
+        showToast('✨ Kundali generated for ' + name + '!');
+
+      } catch(err) {
         document.getElementById('kundaliLoading').classList.remove('visible');
-        document.getElementById('kundaliImages').style.display='block';
-        const errEl=document.getElementById('k-error');
-        errEl.textContent='⚠️ '+(err.message||'API error. Please try again.');
-        errEl.style.display='block';
-        console.error('Kundali error:',err);
+        document.getElementById('kundaliImages').style.display = 'block';
+        errEl.textContent = '⚠️ ' + (err.message || 'API error. Please try again.');
+        errEl.style.display = 'block';
+        console.error('Kundali error:', err);
       }
     }
 
