@@ -3532,18 +3532,20 @@
       const dobRaw = document.getElementById('k-dob').value;
       const tobRaw = document.getElementById('k-tob').value;
       const city   = document.getElementById('k-city').value.trim();
-      const lat    = parseFloat(document.getElementById('k-lat').value);
-      const lon    = parseFloat(document.getElementById('k-lon').value);
-      const tzone  = parseFloat(document.getElementById('k-tz').value);
       const errEl  = document.getElementById('k-error');
       errEl.style.display = 'none';
+
+      // Read coords from kSelectedCity first, then fall back to hidden inputs
+      const lat   = kSelectedCity ? kSelectedCity.lat   : parseFloat(document.getElementById('k-lat').value);
+      const lon   = kSelectedCity ? kSelectedCity.lon   : parseFloat(document.getElementById('k-lon').value);
+      const tzone = kSelectedCity ? kSelectedCity.tz    : parseFloat(document.getElementById('k-tz').value);
 
       const errs = [];
       if (!name)    errs.push('Full Name required');
       if (!dobRaw)  errs.push('Date of Birth required');
       if (!tobRaw)  errs.push('Time of Birth required');
       if (!city)    errs.push('City required — type and select from dropdown');
-      if (isNaN(lat)) errs.push('Select a city from the dropdown suggestions');
+      if (isNaN(lat)) errs.push('Please select a city from the dropdown list');
       if (errs.length) { errEl.textContent = errs.join(' • '); errEl.style.display = 'block'; return; }
 
       const [y, mo, d] = dobRaw.split('-').map(Number);
