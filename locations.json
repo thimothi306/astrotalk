@@ -1,0 +1,170 @@
+{
+  "countries": [
+    {
+      "name": "India",
+      "code": "IN",
+      "timezone": "Asia/Kolkata",
+      "states": [
+        {
+          "name": "Andhra Pradesh",
+          "cities": [
+            {"name": "Hyderabad", "lat": 17.3850, "lon": 78.4867, "timezone": "Asia/Kolkata"},
+            {"name": "Vijayawada", "lat": 16.5062, "lon": 80.6480, "timezone": "Asia/Kolkata"},
+            {"name": "Visakhapatnam", "lat": 17.6869, "lon": 83.2185, "timezone": "Asia/Kolkata"},
+            {"name": "Hanumkonda", "lat": 17.3603, "lon": 78.7468, "timezone": "Asia/Kolkata"},
+            {"name": "Korukollu", "lat": 16.1926, "lon": 79.2381, "timezone": "Asia/Kolkata"},
+            {"name": "Tirupati", "lat": 13.1939, "lon": 79.8711, "timezone": "Asia/Kolkata"},
+            {"name": "Nellore", "lat": 14.4426, "lon": 79.9864, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Telangana",
+          "cities": [
+            {"name": "Hyderabad", "lat": 17.3850, "lon": 78.4867, "timezone": "Asia/Kolkata"},
+            {"name": "Secunderabad", "lat": 17.3689, "lon": 78.5294, "timezone": "Asia/Kolkata"},
+            {"name": "Warangal", "lat": 17.9689, "lon": 79.5941, "timezone": "Asia/Kolkata"},
+            {"name": "Nizamabad", "lat": 18.6726, "lon": 78.0976, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Maharashtra",
+          "cities": [
+            {"name": "Mumbai", "lat": 19.0760, "lon": 72.8777, "timezone": "Asia/Kolkata"},
+            {"name": "Pune", "lat": 18.5204, "lon": 73.8567, "timezone": "Asia/Kolkata"},
+            {"name": "Nagpur", "lat": 21.1458, "lon": 79.0882, "timezone": "Asia/Kolkata"},
+            {"name": "Thane", "lat": 19.2183, "lon": 72.9781, "timezone": "Asia/Kolkata"},
+            {"name": "Aurangabad", "lat": 19.8762, "lon": 75.3433, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Karnataka",
+          "cities": [
+            {"name": "Bangalore", "lat": 12.9716, "lon": 77.5946, "timezone": "Asia/Kolkata"},
+            {"name": "Mysore", "lat": 12.2958, "lon": 76.6394, "timezone": "Asia/Kolkata"},
+            {"name": "Belagavi", "lat": 15.8497, "lon": 74.4977, "timezone": "Asia/Kolkata"},
+            {"name": "Mangalore", "lat": 12.8654, "lon": 74.8457, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Tamil Nadu",
+          "cities": [
+            {"name": "Chennai", "lat": 13.0827, "lon": 80.2707, "timezone": "Asia/Kolkata"},
+            {"name": "Coimbatore", "lat": 11.0081, "lon": 76.9124, "timezone": "Asia/Kolkata"},
+            {"name": "Madurai", "lat": 9.9252, "lon": 78.1198, "timezone": "Asia/Kolkata"},
+            {"name": "Salem", "lat": 11.6643, "lon": 78.1460, "timezone": "Asia/Kolkata"},
+            {"name": "Tiruppur", "lat": 11.1085, "lon": 77.3411, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Uttar Pradesh",
+          "cities": [
+            {"name": "Lucknow", "lat": 26.8467, "lon": 80.9462, "timezone": "Asia/Kolkata"},
+            {"name": "Kanpur", "lat": 26.4499, "lon": 80.3319, "timezone": "Asia/Kolkata"},
+            {"name": "Varanasi", "lat": 25.3176, "lon": 82.9739, "timezone": "Asia/Kolkata"},
+            {"name": "Agra", "lat": 27.1767, "lon": 78.0081, "timezone": "Asia/Kolkata"},
+            {"name": "Mathura", "lat": 27.4924, "lon": 77.6737, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "West Bengal",
+          "cities": [
+            {"name": "Kolkata", "lat": 22.5726, "lon": 88.3639, "timezone": "Asia/Kolkata"},
+            {"name": "Darjeeling", "lat": 27.0410, "lon": 88.2663, "timezone": "Asia/Kolkata"},
+            {"name": "Asansol", "lat": 23.6804, "lon": 86.9640, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Rajasthan",
+          "cities": [
+            {"name": "Jaipur", "lat": 26.9124, "lon": 75.7873, "timezone": "Asia/Kolkata"},
+            {"name": "Udaipur", "lat": 24.5854, "lon": 73.7125, "timezone": "Asia/Kolkata"},
+            {"name": "Jodhpur", "lat": 26.2389, "lon": 73.0243, "timezone": "Asia/Kolkata"},
+            {"name": "Ajmer", "lat": 26.4499, "lon": 74.6399, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Gujarat",
+          "cities": [
+            {"name": "Ahmedabad", "lat": 23.0225, "lon": 72.5714, "timezone": "Asia/Kolkata"},
+            {"name": "Vadodara", "lat": 22.3072, "lon": 73.1812, "timezone": "Asia/Kolkata"},
+            {"name": "Surat", "lat": 21.1702, "lon": 72.8311, "timezone": "Asia/Kolkata"},
+            {"name": "Rajkot", "lat": 22.3039, "lon": 70.8022, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Madhya Pradesh",
+          "cities": [
+            {"name": "Bhopal", "lat": 23.1815, "lon": 77.4104, "timezone": "Asia/Kolkata"},
+            {"name": "Indore", "lat": 22.7196, "lon": 75.8577, "timezone": "Asia/Kolkata"},
+            {"name": "Gwalior", "lat": 26.2389, "lon": 78.1770, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Kerala",
+          "cities": [
+            {"name": "Kochi", "lat": 9.9312, "lon": 76.2673, "timezone": "Asia/Kolkata"},
+            {"name": "Thiruvananthapuram", "lat": 8.5241, "lon": 76.9366, "timezone": "Asia/Kolkata"},
+            {"name": "Kozhikode", "lat": 11.2588, "lon": 75.7804, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Bihar",
+          "cities": [
+            {"name": "Patna", "lat": 25.5941, "lon": 85.1376, "timezone": "Asia/Kolkata"},
+            {"name": "Gaya", "lat": 24.7914, "lon": 84.7956, "timezone": "Asia/Kolkata"},
+            {"name": "Bhagalpur", "lat": 25.2820, "lon": 86.4725, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Jharkhand",
+          "cities": [
+            {"name": "Ranchi", "lat": 23.3441, "lon": 85.3096, "timezone": "Asia/Kolkata"},
+            {"name": "Dhanbad", "lat": 23.7957, "lon": 86.4304, "timezone": "Asia/Kolkata"},
+            {"name": "Jamshedpur", "lat": 22.8046, "lon": 86.1856, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Odisha",
+          "cities": [
+            {"name": "Bhubaneswar", "lat": 20.2961, "lon": 85.8245, "timezone": "Asia/Kolkata"},
+            {"name": "Cuttack", "lat": 20.4625, "lon": 85.8830, "timezone": "Asia/Kolkata"},
+            {"name": "Puri", "lat": 19.8135, "lon": 85.8312, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Punjab",
+          "cities": [
+            {"name": "Chandigarh", "lat": 30.7333, "lon": 76.7794, "timezone": "Asia/Kolkata"},
+            {"name": "Amritsar", "lat": 31.6340, "lon": 74.8723, "timezone": "Asia/Kolkata"},
+            {"name": "Ludhiana", "lat": 30.9010, "lon": 75.8573, "timezone": "Asia/Kolkata"},
+            {"name": "Jalandhar", "lat": 31.7260, "lon": 75.5762, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Himachal Pradesh",
+          "cities": [
+            {"name": "Shimla", "lat": 31.7771, "lon": 77.1025, "timezone": "Asia/Kolkata"},
+            {"name": "Solan", "lat": 30.8134, "lon": 77.1594, "timezone": "Asia/Kolkata"},
+            {"name": "Dharamshala", "lat": 32.2190, "lon": 76.3234, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Jammu & Kashmir",
+          "cities": [
+            {"name": "Srinagar", "lat": 34.0837, "lon": 74.7973, "timezone": "Asia/Kolkata"},
+            {"name": "Jammu", "lat": 32.7273, "lon": 74.8479, "timezone": "Asia/Kolkata"},
+            {"name": "Leh", "lat": 34.1526, "lon": 77.5770, "timezone": "Asia/Kolkata"}
+          ]
+        },
+        {
+          "name": "Uttarakhand",
+          "cities": [
+            {"name": "Dehradun", "lat": 30.1928, "lon": 78.1470, "timezone": "Asia/Kolkata"},
+            {"name": "Nainital", "lat": 29.3919, "lon": 79.4504, "timezone": "Asia/Kolkata"},
+            {"name": "Almora", "lat": 29.5882, "lon": 79.6401, "timezone": "Asia/Kolkata"}
+          ]
+        }
+      ]
+    }
+  ]
+}
