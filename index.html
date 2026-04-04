@@ -1545,7 +1545,9 @@
     #kundaliReport .k-charts { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; text-align:center; }
     #kundaliReport .k-chart-box { padding:16px; background:#f9f6ff; border-radius:12px; }
     #kundaliReport .k-chart-box h4 { font-family:'Cinzel',serif; font-size:1em; color:var(--dark); margin-bottom:12px; font-weight:700; }
-    #kundaliReport .k-chart-box > div { border:2px solid var(--lavender); border-radius:10px; overflow:hidden; background:#fff; padding:8px; }
+    #kundaliReport .k-chart-box > div { border:2px solid var(--lavender); border-radius:10px; overflow:visible; background:#fff; padding:8px; }
+    #kundaliReport .k-chart-box svg { width:100%; height:auto; max-width:100%; display:block; }
+    #kundaliReport .k-chart-box img { width:100%; height:auto; max-width:100%; display:block; }
     @media (max-width:1200px) { #kundaliReport .k-charts { grid-template-columns:repeat(2,1fr); } }
     @media (max-width:768px) { #kundaliReport .k-charts { grid-template-columns:1fr; } }
     #kundaliReport .k-yoga { border-left:4px solid var(--orange); background:#fff8f0; border-radius:8px; padding:10px 14px; margin-bottom:8px; }

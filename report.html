@@ -124,9 +124,23 @@
     .k-chart-box > div {
       border: 2px solid var(--lavender);
       border-radius: 10px;
-      overflow: hidden;
+      overflow: visible;
       background: #fff;
       padding: 8px;
+    }
+
+    .k-chart-box svg {
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      display: block;
+    }
+
+    .k-chart-box img {
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      display: block;
     }
 
     table {
@@ -324,6 +338,11 @@
       document.title = (name || 'Kundali') + ' - Vedic Report';
     } else {
       document.getElementById('reportContent').innerHTML = '<p style="text-align:center;padding:40px;color:#999;">No report data found. Please generate a Kundali first.</p>';
+    }
+
+    // Download PDF function (for button in report)
+    function downloadKundaliPDF(nameParam) {
+      window.print();
     }
   </script>
 </body>
