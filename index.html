@@ -1509,8 +1509,29 @@
     }
 
     /* ── KUNDALI REPORT STYLES ── */
-    #kundaliReport .k-section { font-family:'Cinzel',serif; font-size:.95rem; font-weight:700; color:var(--dark); border-bottom:2px solid var(--lavender); padding-bottom:8px; margin:24px 0 12px; }
-    #kundaliReport .k-card { background:var(--white); border-radius:14px; padding:18px 20px; box-shadow:var(--shadow); border:1px solid var(--lavender); margin-bottom:16px; }
+    #kundaliReport .k-section {
+      font-family:'Cinzel',serif;
+      font-size:1.1rem;
+      font-weight:700;
+      color:var(--dark);
+      border-bottom:3px solid var(--dark);
+      padding-bottom:10px;
+      margin:28px 0 16px;
+      text-transform:uppercase;
+      letter-spacing:.5px;
+    }
+    #kundaliReport .k-card {
+      background:var(--white);
+      border-radius:12px;
+      padding:22px 24px;
+      box-shadow:0 4px 16px rgba(44,32,85,0.1);
+      border:1px solid var(--lavender);
+      margin-bottom:18px;
+      transition:box-shadow .3s;
+    }
+    #kundaliReport .k-card:hover {
+      box-shadow:0 6px 20px rgba(44,32,85,0.15);
+    }
     #kundaliReport .k-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:10px; }
     #kundaliReport .k-item { background:#f9f6ff; border-left:4px solid var(--dark); border-radius:8px; padding:10px 12px; }
     #kundaliReport .k-label { font-size:.72em; color:var(--dark); text-transform:uppercase; font-weight:700; margin-bottom:3px; }
@@ -3431,6 +3452,19 @@
       { h: 9, r: 3, c: 0 }, { h: 8, r: 3, c: 1 }, { h: 7, r: 3, c: 2 }, { h: 6, r: 3, c: 3 }
     ];
 
+    // ── Download Kundali as PDF ──
+    function downloadKundaliPDF(name) {
+      const element = document.getElementById('reportPrintable');
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `${name}_Kundali_${new Date().getFullYear()}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+      };
+      html2pdf().set(opt).from(element).save();
+    }
+
     /* ══ KUNDALI API ══ */
     const K_PROXY = '/api/astrology-proxy';
 
@@ -3628,12 +3662,15 @@
         const fullLocation = kSelectedCity ? kSelectedCity.fullName : city;
 
         document.getElementById('kundaliReport').innerHTML = `
+          <div id="reportPrintable">
           <!-- Header -->
-          <div style="background:linear-gradient(135deg,var(--dark),#4a3580);color:#fff;border-radius:14px;padding:22px 26px;margin-bottom:20px;text-align:center;">
-            <div style="font-size:2rem;margin-bottom:6px;">🔮</div>
-            <h3 style="font-family:'Cinzel',serif;font-size:1.4em;margin-bottom:6px;">${name}'s Vedic Kundali</h3>
-            <p style="opacity:.85;font-size:.88em;">${String(d).padStart(2,'0')}-${String(mo).padStart(2,'0')}-${y} &nbsp;|&nbsp; ${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')} &nbsp;|&nbsp; ${fullLocation}</p>
-            <p style="opacity:.7;font-size:.78em;margin-top:4px;">Lat: ${lat.toFixed(4)}° | Lon: ${lon.toFixed(4)}° | Timezone: UTC+${tzone}</p>
+          <div style="background:linear-gradient(135deg,var(--dark),#4a3580);color:#fff;border-radius:14px;padding:28px 30px;margin-bottom:24px;text-align:center;box-shadow:0 8px 24px rgba(44,32,85,0.2);">
+            <div style="font-size:3rem;margin-bottom:12px;">🔮</div>
+            <h2 style="font-family:'Cinzel',serif;font-size:1.8em;margin:0 0 12px 0;letter-spacing:.5px;">${name}'s Vedic Kundali</h2>
+            <div style="height:2px;background:rgba(255,255,255,0.3);margin:12px 0;"></div>
+            <p style="opacity:.9;font-size:.95em;margin:8px 0;"><strong>📅 ${String(d).padStart(2,'0')}-${String(mo).padStart(2,'0')}-${y}</strong> at <strong>${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}</strong></p>
+            <p style="opacity:.85;font-size:.9em;margin:4px 0;"><strong>📍 ${fullLocation}</strong></p>
+            <p style="opacity:.7;font-size:.8em;margin-top:8px;">Coordinates: ${lat.toFixed(4)}° N, ${lon.toFixed(4)}° E | Timezone: UTC+${tzone}</p>
           </div>
 
           <!-- Birth Details -->
@@ -3848,6 +3885,14 @@
 
           <div style="text-align:center;padding:16px 0 4px;color:var(--muted);font-size:.78em;border-top:1px solid var(--lavender);margin-top:16px;">
             Generated ${new Date().toLocaleString()}
+          </div>
+          </div><!-- End reportPrintable -->
+
+          <!-- Download PDF Button -->
+          <div style="text-align:center;margin-top:24px;padding:20px;">
+            <button onclick="downloadKundaliPDF('${name}')" style="background:linear-gradient(135deg,var(--dark),#4a3580);color:#fff;border:none;padding:14px 32px;border-radius:8px;font-size:1em;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(44,32,85,0.2);transition:all .3s;">
+              📥 Download as PDF
+            </button>
           </div>
         `;
 
