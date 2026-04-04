@@ -3707,16 +3707,20 @@
 
           <!-- Vimshottari Dasha -->
           <div class="k-section">📅 Vimshottari Dasha (Major Life Periods)</div>
-          <div class="k-card" style="overflow-x:auto;">
-            <table>
-              <thead><tr><th>Mahadasha Lord</th><th>Start Date</th><th>End Date</th><th>Duration</th></tr></thead>
-              <tbody>${kArr(majorDasha,'dashas','major_vdasha','data').map(ds=>`<tr>
-                <td><strong>${kVal(ds,'lord','planet','name')}</strong></td>
-                <td>${kVal(ds,'startDate','start_date','start')}</td>
-                <td>${kVal(ds,'endDate','end_date','end')}</td>
-                <td>${kVal(ds,'years','duration','period')} yrs</td>
-              </tr>`).join('')}</tbody>
-            </table>
+          <div class="k-card">
+            <p class="k-report-text">The Vimshottari Dasha system divides your life into planetary periods. Each planet rules a specific timeframe, influencing your life events, opportunities, and challenges. Below are your major life periods:</p>
+            <div style="margin-top:16px;padding:14px;background:#f9f6ff;border-radius:8px;border-left:4px solid var(--dark);">
+              ${kArr(majorDasha,'dashas','major_vdasha','data').map((ds,i)=>`
+                <div style="margin-bottom:12px;${i>0?'border-top:1px solid var(--lavender);padding-top:12px;':''}"
+                  <strong style="color:var(--dark);font-size:1.05em;">${i+1}. ${kVal(ds,'lord','planet','name')} Mahadasha</strong>
+                  <p style="margin:6px 0 0 0;color:#555;font-size:.92em;line-height:1.6;">
+                    <strong>Period:</strong> ${kVal(ds,'startDate','start_date','start')} to ${kVal(ds,'endDate','end_date','end')}<br/>
+                    <strong>Duration:</strong> ${kVal(ds,'years','duration','period')} years<br/>
+                    This is a significant period in your life ruled by ${kVal(ds,'lord','planet','name')}. The characteristics and events during this period will be strongly influenced by the nature and placement of this planet in your birth chart.
+                  </p>
+                </div>
+              `).join('')}
+            </div>
           </div>
 
           <!-- Current Vimshottari Dasha -->
@@ -3750,28 +3754,32 @@
           <!-- Yogini Dasha -->
           ${yoginiDasha && kArr(yoginiDasha,'dashas','yogini_dashas','data').length > 0?`
           <div class="k-section">🌸 Major Yogini Dasha</div>
-          <div class="k-card" style="overflow-x:auto;">
-            <table>
-              <thead><tr><th>Yogini Dasha Lord</th><th>Start Date</th><th>End Date</th><th>Duration</th></tr></thead>
-              <tbody>${kArr(yoginiDasha,'dashas','yogini_dashas','data').map(yd=>`<tr>
-                <td><strong>${kVal(yd,'lord','name','dasha_name')}</strong></td>
-                <td>${kVal(yd,'startDate','start_date','start')}</td>
-                <td>${kVal(yd,'endDate','end_date','end')}</td>
-                <td>${kVal(yd,'years','duration','period')} yrs</td>
-              </tr>`).join('')}</tbody>
-            </table>
+          <div class="k-card">
+            <p class="k-report-text">The Yogini Dasha is an alternative dasha system where each of nine Yogini goddesses rules specific life periods. This system provides complementary insights to the Vimshottari Dasha and offers deeper understanding of life cycles and spiritual evolution:</p>
+            <div style="margin-top:16px;padding:14px;background:#fff8f0;border-radius:8px;border-left:4px solid var(--orange);">
+              ${kArr(yoginiDasha,'dashas','yogini_dashas','data').map((yd,i)=>`
+                <div style="margin-bottom:12px;${i>0?'border-top:1px solid rgba(249,166,22,0.2);padding-top:12px;':''}"
+                  <strong style="color:var(--dark);font-size:1.05em;">${i+1}. ${kVal(yd,'lord','name','dasha_name')} Yogini Dasha</strong>
+                  <p style="margin:6px 0 0 0;color:#555;font-size:.92em;line-height:1.6;">
+                    <strong>Period:</strong> ${kVal(yd,'startDate','start_date','start')} to ${kVal(yd,'endDate','end_date','end')}<br/>
+                    <strong>Duration:</strong> ${kVal(yd,'years','duration','period')} years<br/>
+                    The ${kVal(yd,'lord','name','dasha_name')} Yogini governs this period. Each Yogini brings her unique spiritual qualities, blessings, and challenges. This period will shape your spiritual journey and karmic experiences.
+                  </p>
+                </div>
+              `).join('')}
+            </div>
           </div>` : ''}
 
           <!-- Current Yogini Dasha -->
           ${currentYogini && kVal(currentYogini,'dasha_name','name')?`
-          <div class="k-section">🌸 Current Yogini Dasha</div>
+          <div class="k-section">🌸 Your Current Yogini Dasha</div>
           <div class="k-card">
-            <div class="k-grid">
-              ${kItemIfExists('Current Yogini Dasha', kVal(currentYogini,'dasha_name','name'))}
-              ${kItemIfExists('Start Date', kVal(currentYogini,'start_date','start'))}
-              ${kItemIfExists('End Date', kVal(currentYogini,'end_date','end'))}
-              ${kItemIfExists('Duration', kVal(currentYogini,'duration','years','period')?`${kVal(currentYogini,'duration','years','period')} yrs`:null)}
-            </div>
+            <p class="k-report-text">
+              You are currently under the influence of <strong>${kVal(currentYogini,'dasha_name','name')}</strong> Yogini Dasha, which is active from <strong>${kVal(currentYogini,'start_date','start')}</strong> to <strong>${kVal(currentYogini,'end_date','end')}</strong> (${kVal(currentYogini,'duration','years','period')} years).
+            </p>
+            <p class="k-report-text">
+              The ${kVal(currentYogini,'dasha_name','name')} Yogini brings her unique blessings and lessons during this period. This is a time to align with her spiritual energy and understand the karmic lessons she brings into your life. Pay attention to the themes and challenges that arise, as they are meant to facilitate your spiritual growth and evolution.
+            </p>
           </div>` : ''}
 
           <!-- Dosha Analysis -->
