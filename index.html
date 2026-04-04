@@ -4010,11 +4010,22 @@
           </div>
         `;
 
+        // Store report in sessionStorage and open in new window
+        sessionStorage.setItem('kundaliReport', html);
+        sessionStorage.setItem('kundaliName', name);
+
         document.getElementById('kundaliLoading').classList.remove('visible');
         document.getElementById('kundaliImages').style.display = 'none';
-        document.getElementById('kundaliReport').style.display = 'block';
-        document.getElementById('kundaliReport').scrollIntoView({ behavior:'smooth', block:'start' });
-        showToast('✨ Kundali generated for ' + name + '!');
+
+        showToast('✨ Opening Kundali report in new window...');
+
+        // Open report in new tab
+        setTimeout(() => {
+          const reportWindow = window.open('report.html', '_blank');
+          if (!reportWindow) {
+            showToast('❌ Could not open window. Please allow popups.');
+          }
+        }, 300);
 
       } catch(err) {
         document.getElementById('kundaliLoading').classList.remove('visible');
