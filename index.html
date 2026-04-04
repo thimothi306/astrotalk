@@ -3521,7 +3521,9 @@
       'Pisces':     {num:'3,7',color:'Yellow, Sea Green',gem:'Yellow Sapphire',metal:'Gold',day:'Thursday',deity:'Vishnu',dir:'North-East',mantra:'Om Gurave Namaha',friend:'Moon, Mars',avoid:'Mercury, Saturn'}
     };
     function kArr(r,...keys){if(!r)return[];if(Array.isArray(r))return r;for(const k of keys)if(r[k]&&Array.isArray(r[k]))return r[k];return[];}
-    function kVal(o,...keys){if(!o)return'—';for(const k of keys)if(o[k]!==undefined&&o[k]!==null&&o[k]!=='')return o[k];return'—';}
+    function kVal(o,...keys){if(!o)return null;for(const k of keys)if(o[k]!==undefined&&o[k]!==null&&o[k]!=='')return o[k];return null;}
+    // Helper: only render div if value exists
+    function kItemIfExists(label, val){return val?`<div class="k-item"><div class="k-label">${label}</div><div class="k-value">${val}</div></div>`:'';}
     async function kProxy(ep,body){
       const res=await fetch(K_PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:ep,data:body})});
       const j=await res.json();if(!res.ok||j.error)throw new Error(j.error||ep+' failed');return j;
@@ -3606,32 +3608,32 @@
           <!-- Birth Details -->
           <div class="k-section">📋 Birth Details</div>
           <div class="k-card"><div class="k-grid">
-            <div class="k-item"><div class="k-label">Full Name</div><div class="k-value">${name}</div></div>
-            <div class="k-item"><div class="k-label">Date of Birth</div><div class="k-value">${String(d).padStart(2,'0')}-${String(mo).padStart(2,'0')}-${y}</div></div>
-            <div class="k-item"><div class="k-label">Time of Birth</div><div class="k-value">${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}</div></div>
-            <div class="k-item"><div class="k-label">Place of Birth</div><div class="k-value">${fullLocation}</div></div>
-            <div class="k-item"><div class="k-label">Sunrise</div><div class="k-value">${kVal(birthDet,'sunrise')}</div></div>
-            <div class="k-item"><div class="k-label">Sunset</div><div class="k-value">${kVal(birthDet,'sunset')}</div></div>
-            <div class="k-item"><div class="k-label">Ayanamsa</div><div class="k-value">${parseFloat(birthDet.ayanamsha||0).toFixed(4)}°</div></div>
-            <div class="k-item"><div class="k-label">Timezone</div><div class="k-value">UTC+${tzone}</div></div>
+            ${kItemIfExists('Full Name', name)}
+            ${kItemIfExists('Date of Birth', `${String(d).padStart(2,'0')}-${String(mo).padStart(2,'0')}-${y}`)}
+            ${kItemIfExists('Time of Birth', `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`)}
+            ${kItemIfExists('Place of Birth', fullLocation)}
+            ${kItemIfExists('Sunrise', kVal(birthDet,'sunrise'))}
+            ${kItemIfExists('Sunset', kVal(birthDet,'sunset'))}
+            ${kItemIfExists('Ayanamsa', `${parseFloat(birthDet.ayanamsha||0).toFixed(4)}°`)}
+            ${kItemIfExists('Timezone', `UTC+${tzone}`)}
           </div></div>
 
           <!-- Key Indicators -->
           <div class="k-section">⭐ Key Indicators</div>
           <div class="k-card"><div class="k-grid">
-            <div class="k-item"><div class="k-label">Lagna (Ascendant)</div><div class="k-value">${lagna}</div></div>
-            <div class="k-item"><div class="k-label">Rashi (Moon Sign)</div><div class="k-value">${rashi}</div></div>
-            <div class="k-item"><div class="k-label">Nakshatra (Birth Star)</div><div class="k-value">${nak}</div></div>
+            ${kItemIfExists('Lagna (Ascendant)', lagna)}
+            ${kItemIfExists('Rashi (Moon Sign)', rashi)}
+            ${kItemIfExists('Nakshatra (Birth Star)', nak)}
           </div></div>
 
           <!-- Panchang -->
           <div class="k-section">🗓️ Panchang (Birth Day Details)</div>
           <div class="k-card"><div class="k-grid">
-            <div class="k-item"><div class="k-label">Tithi (Lunar Day)</div><div class="k-value">${kVal(panchang,'tithi','tithi_name')}</div></div>
-            <div class="k-item"><div class="k-label">Vara (Weekday)</div><div class="k-value">${kVal(panchang,'vara','day','vaara')}</div></div>
-            <div class="k-item"><div class="k-label">Nakshatra</div><div class="k-value">${kVal(panchang,'nakshatra','nakshatra_name')}</div></div>
-            <div class="k-item"><div class="k-label">Yoga</div><div class="k-value">${kVal(panchang,'yoga','yoga_name')}</div></div>
-            <div class="k-item"><div class="k-label">Karana</div><div class="k-value">${kVal(panchang,'karana','karana_name')}</div></div>
+            ${kItemIfExists('Tithi (Lunar Day)', kVal(panchang,'tithi','tithi_name'))}
+            ${kItemIfExists('Vara (Weekday)', kVal(panchang,'vara','day','vaara'))}
+            ${kItemIfExists('Nakshatra', kVal(panchang,'nakshatra','nakshatra_name'))}
+            ${kItemIfExists('Yoga', kVal(panchang,'yoga','yoga_name'))}
+            ${kItemIfExists('Karana', kVal(panchang,'karana','karana_name'))}
           </div></div>
 
           <!-- Charts -->
@@ -3734,10 +3736,10 @@
           <div class="k-section">🌸 Current Yogini Dasha</div>
           <div class="k-card">
             <div class="k-grid">
-              <div class="k-item"><div class="k-label">Current Yogini Dasha</div><div class="k-value">${kVal(currentYogini,'dasha_name','name')}</div></div>
-              <div class="k-item"><div class="k-label">Start Date</div><div class="k-value">${kVal(currentYogini,'start_date','start')}</div></div>
-              <div class="k-item"><div class="k-label">End Date</div><div class="k-value">${kVal(currentYogini,'end_date','end')}</div></div>
-              <div class="k-item"><div class="k-label">Duration</div><div class="k-value">${kVal(currentYogini,'duration','years','period')} yrs</div></div>
+              ${kItemIfExists('Current Yogini Dasha', kVal(currentYogini,'dasha_name','name'))}
+              ${kItemIfExists('Start Date', kVal(currentYogini,'start_date','start'))}
+              ${kItemIfExists('End Date', kVal(currentYogini,'end_date','end'))}
+              ${kItemIfExists('Duration', kVal(currentYogini,'duration','years','period')?`${kVal(currentYogini,'duration','years','period')} yrs`:null)}
             </div>
           </div>` : ''}
 
@@ -3761,17 +3763,17 @@
           </div></div>
 
           <!-- Ascendant Report -->
-          ${ascRep?`
+          ${ascRep&&kVal(ascRep,'report','description','result','asc_report')?`
           <div class="k-section">🌟 Lagna (Ascendant) Personality Report</div>
           <div class="k-card"><p class="k-report-text">${kVal(ascRep,'report','description','result','asc_report')}</p></div>`:''}
 
           <!-- Moon Report -->
-          ${moonRep?`
+          ${moonRep&&kVal(moonRep,'report','description','result','moon_report')?`
           <div class="k-section">🌙 Moon (Chandra) Report</div>
           <div class="k-card"><p class="k-report-text">${kVal(moonRep,'report','description','result','moon_report')}</p></div>`:''}
 
           <!-- Sun Report -->
-          ${sunRep?`
+          ${sunRep&&kVal(sunRep,'report','description','result','sun_report')?`
           <div class="k-section">☀️ Sun (Surya) Report</div>
           <div class="k-card"><p class="k-report-text">${kVal(sunRep,'report','description','result','sun_report')}</p></div>`:''}
 
@@ -3780,16 +3782,16 @@
           <div class="k-card">
             <p style="color:#888;font-size:.85em;margin-bottom:12px;"><em>Note: Lucky factors are based on your Rashi (Moon Sign). All people born under ${rashi} Rashi share these auspicious numbers, colors, and gemstones according to Vedic astrology.</em></p>
             <div class="k-grid">
-            <div class="k-item"><div class="k-label">🔢 Lucky Numbers</div><div class="k-value">${lf.num}</div></div>
-            <div class="k-item"><div class="k-label">🎨 Lucky Colors</div><div class="k-value">${lf.color}</div></div>
-            <div class="k-item"><div class="k-label">💎 Lucky Gemstone</div><div class="k-value">${lf.gem}</div></div>
-            <div class="k-item"><div class="k-label">⚙️ Lucky Metal</div><div class="k-value">${lf.metal}</div></div>
-            <div class="k-item"><div class="k-label">📅 Lucky Day</div><div class="k-value">${lf.day}</div></div>
-            <div class="k-item"><div class="k-label">🧭 Lucky Direction</div><div class="k-value">${lf.dir}</div></div>
-            <div class="k-item"><div class="k-label">🙏 Deity to Worship</div><div class="k-value">${lf.deity}</div></div>
-            <div class="k-item"><div class="k-label">🕉️ Mantra</div><div class="k-value" style="font-size:.8em">${lf.mantra}</div></div>
-            <div class="k-item"><div class="k-label">🤝 Friendly Planets</div><div class="k-value green">${lf.friend}</div></div>
-            <div class="k-item"><div class="k-label">⚠️ Avoid Planets</div><div class="k-value red">${lf.avoid}</div></div>
+            ${kItemIfExists('🔢 Lucky Numbers', lf.num)}
+            ${kItemIfExists('🎨 Lucky Colors', lf.color)}
+            ${kItemIfExists('💎 Lucky Gemstone', lf.gem)}
+            ${kItemIfExists('⚙️ Lucky Metal', lf.metal)}
+            ${kItemIfExists('📅 Lucky Day', lf.day)}
+            ${kItemIfExists('🧭 Lucky Direction', lf.dir)}
+            ${kItemIfExists('🙏 Deity to Worship', lf.deity)}
+            ${kItemIfExists('🕉️ Mantra', `<span style="font-size:.8em">${lf.mantra}</span>`)}
+            ${kItemIfExists('🤝 Friendly Planets', `<span class="green">${lf.friend}</span>`)}
+            ${kItemIfExists('⚠️ Avoid Planets', `<span class="red">${lf.avoid}</span>`)}
           </div></div>
 
           <!-- Remedies -->
