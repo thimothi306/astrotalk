@@ -2437,9 +2437,43 @@
       background-size: 200% auto;
       animation: shimmer 2.5s infinite;
     }
+
+    /* ── PRINT STYLES FOR PDF ── */
+    @media print {
+      body {
+        background: white;
+      }
+      #kundaliReport {
+        display: block !important;
+      }
+      #reportPrintable {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+      }
+      /* Hide download button in print */
+      #reportPrintable + div button {
+        display: none !important;
+      }
+      /* Ensure charts display properly */
+      #kundaliReport .k-charts {
+        page-break-inside: avoid;
+      }
+      #kundaliReport .k-card {
+        page-break-inside: avoid;
+      }
+      #kundaliReport table {
+        width: 100% !important;
+      }
+      /* Remove shadows and animations in print */
+      #kundaliReport * {
+        box-shadow: none !important;
+        animation: none !important;
+      }
+    }
   </style>
-  <!-- HTML2PDF Library for PDF Download -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
 </head>
 
 <body>
@@ -3457,116 +3491,29 @@
       { h: 9, r: 3, c: 0 }, { h: 8, r: 3, c: 1 }, { h: 7, r: 3, c: 2 }, { h: 6, r: 3, c: 3 }
     ];
 
-    // ── Download Kundali as PDF ──
+    // ── Download Kundali as PDF using browser print ──
     function downloadKundaliPDF(name) {
-      if (typeof html2pdf === 'undefined') {
-        showToast('⚠️ PDF library loading... Please try again in a moment');
-        return;
-      }
       const element = document.getElementById('reportPrintable');
       if (!element) {
         showToast('❌ Report not found');
         return;
       }
-      showToast('📄 Generating PDF...');
 
-      // Clone the element to avoid modifying original
-      const clone = element.cloneNode(true);
+      // Hide the download button before printing
+      const downloadBtn = event.target;
+      downloadBtn.style.display = 'none';
 
-      // Convert SVGs to canvas for better PDF rendering
-      const svgs = clone.querySelectorAll('svg');
-      let svgConversionsComplete = 0;
-
-      if (svgs.length === 0) {
-        // No SVGs, proceed directly
-        generatePDFFromElement(clone, name);
-        return;
-      }
-
-      svgs.forEach((svg) => {
-        try {
-          // Create canvas from SVG
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          const serializer = new XMLSerializer();
-          const svgData = serializer.serializeToString(svg);
-
-          // Get SVG dimensions
-          const width = svg.getAttribute('width') || svg.getBoundingClientRect().width || 300;
-          const height = svg.getAttribute('height') || svg.getBoundingClientRect().height || 300;
-
-          canvas.width = width * 2; // 2x for better quality
-          canvas.height = height * 2;
-
-          const img = new Image();
-          img.onload = () => {
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const imgCanvas = canvas.toDataURL('image/png');
-
-            // Replace SVG with canvas image
-            const canvasImg = document.createElement('img');
-            canvasImg.src = imgCanvas;
-            canvasImg.style.width = width + 'px';
-            canvasImg.style.height = height + 'px';
-            canvasImg.style.display = 'block';
-
-            svg.parentNode.replaceChild(canvasImg, svg);
-            svgConversionsComplete++;
-
-            if (svgConversionsComplete === svgs.length) {
-              generatePDFFromElement(clone, name);
-            }
-          };
-
-          img.onerror = () => {
-            svgConversionsComplete++;
-            if (svgConversionsComplete === svgs.length) {
-              generatePDFFromElement(clone, name);
-            }
-          };
-
-          const blob = new Blob([svgData], { type: 'image/svg+xml' });
-          const url = URL.createObjectURL(blob);
-          img.src = url;
-        } catch(err) {
-          console.error('SVG conversion error:', err);
-          svgConversionsComplete++;
-          if (svgConversionsComplete === svgs.length) {
-            generatePDFFromElement(clone, name);
-          }
-        }
-      });
-    }
-
-    function generatePDFFromElement(element, name) {
-      const opt = {
-        margin: [10, 10, 10, 10],
-        filename: `${name}_Kundali_${new Date().getFullYear()}.pdf`,
-        image: { type: 'png', quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          allowTaint: true,
-          useCORS: true,
-          logging: false,
-          backgroundColor: '#ffffff',
-          windowHeight: element.scrollHeight
-        },
-        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-      };
+      // Show print dialog
+      showToast('📄 Opening print dialog...');
 
       setTimeout(() => {
-        html2pdf()
-          .set(opt)
-          .from(element)
-          .save()
-          .then(() => {
-            showToast('✅ PDF downloaded successfully!');
-          })
-          .catch((err) => {
-            console.error('PDF generation error:', err);
-            showToast('❌ PDF generation failed. Try again.');
-          });
-      }, 500);
+        window.print();
+
+        // Restore button after print dialog closes
+        setTimeout(() => {
+          downloadBtn.style.display = 'block';
+        }, 500);
+      }, 100);
     }
 
     /* ══ KUNDALI API ══ */
