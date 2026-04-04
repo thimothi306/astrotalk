@@ -3493,9 +3493,15 @@
 
     function kSelectCity(el) {
       const label = el.getAttribute('data-label');
-      const lat   = parseFloat(el.getAttribute('data-lat'));
-      const lon   = parseFloat(el.getAttribute('data-lon'));
-      const tz    = parseFloat(el.getAttribute('data-tz'));
+      const latStr = el.getAttribute('data-lat');
+      const lonStr = el.getAttribute('data-lon');
+      const tzStr  = el.getAttribute('data-tz');
+
+      const lat = parseFloat(latStr);
+      const lon = parseFloat(lonStr);
+      const tz  = parseFloat(tzStr);
+
+      console.log('kSelectCity clicked:', { label, lat, lon, tz, latStr, lonStr, tzStr });
       // Use short name (first part before comma)
       const shortName = label.split(',')[0].trim();
       document.getElementById('k-city').value = shortName;
@@ -3542,6 +3548,8 @@
       const lon   = kSelectedCity ? kSelectedCity.lon   : parseFloat(document.getElementById('k-lon').value);
       const tzone = kSelectedCity ? kSelectedCity.tz    : parseFloat(document.getElementById('k-tz').value);
 
+      console.log('generateKundali validation:', { kSelectedCity, lat, lon, tzone, isNaNlat: isNaN(lat), isNaNlon: isNaN(lon), isNaNtz: isNaN(tzone) });
+
       const errs = [];
       if (!name)    errs.push('Full Name required');
       if (!dobRaw)  errs.push('Date of Birth required');
@@ -3549,7 +3557,7 @@
       if (!city)    errs.push('City required — type and select from dropdown');
       if (!kSelectedCity) errs.push('Please select a city from the dropdown suggestions (do not just type)');
       if (isNaN(lat) || isNaN(lon) || isNaN(tzone)) errs.push('Location coordinates invalid — select from dropdown');
-      if (errs.length) { errEl.textContent = errs.join(' • '); errEl.style.display = 'block'; return; }
+      if (errs.length) { errEl.textContent = errs.join(' • '); errEl.style.display = 'block'; console.error('Validation errors:', errs); return; }
 
       const [y, mo, d] = dobRaw.split('-').map(Number);
       const [h, mi]    = tobRaw.split(':').map(Number);
