@@ -3775,7 +3775,7 @@
 
         const fullLocation = kSelectedCity ? kSelectedCity.fullName : city;
 
-        document.getElementById('kundaliReport').innerHTML = `
+        const html = `
           <div id="reportPrintable">
           <!-- Header -->
           <div style="background:linear-gradient(135deg,var(--dark),#4a3580);color:#fff;border-radius:14px;padding:28px 30px;margin-bottom:24px;text-align:center;box-shadow:0 8px 24px rgba(44,32,85,0.2);">
@@ -4010,7 +4010,8 @@
           </div>
         `;
 
-        // Store report in sessionStorage and open in new window
+        // Set HTML and store report in sessionStorage
+        document.getElementById('kundaliReport').innerHTML = html;
         sessionStorage.setItem('kundaliReport', html);
         sessionStorage.setItem('kundaliName', name);
 
