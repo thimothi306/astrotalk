@@ -2816,9 +2816,6 @@
           <button class="btn btn-lpurple" style="width:100%;padding:14px;font-size:1rem;margin-top:8px;" onclick="generateKundali()">
             Generate My Free Kundali ✨
           </button>
-          <div class="kundali-api-note">
-            ✦ Powered by <strong>AstrologyAPI</strong> — real Vedic calculations: planets, dashas, doshas, charts & lucky factors.
-          </div>
         </div>
 
         <!-- Result -->
@@ -3687,7 +3684,7 @@
           <div class="k-card" style="overflow-x:auto;">
             <table>
               <thead><tr><th>Mahadasha Lord</th><th>Start Date</th><th>End Date</th><th>Duration</th></tr></thead>
-              <tbody>${kArr(dasha,'dashas','major_vdasha','data').map(ds=>`<tr>
+              <tbody>${kArr(majorDasha,'dashas','major_vdasha','data').map(ds=>`<tr>
                 <td><strong>${kVal(ds,'lord','planet','name')}</strong></td>
                 <td>${kVal(ds,'startDate','start_date','start')}</td>
                 <td>${kVal(ds,'endDate','end_date','end')}</td>
@@ -3816,7 +3813,7 @@
           </ul></div>
 
           <div style="text-align:center;padding:16px 0 4px;color:var(--muted);font-size:.78em;border-top:1px solid var(--lavender);margin-top:16px;">
-            ✦ Powered by AstrologyAPI — Professional Vedic Calculations &nbsp;|&nbsp; Generated ${new Date().toLocaleString()} ✦
+            Generated ${new Date().toLocaleString()}
           </div>
         `;
 
