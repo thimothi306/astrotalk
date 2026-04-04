@@ -469,8 +469,19 @@
     if (reportHTML) {
       document.getElementById('reportContent').innerHTML = reportHTML;
       document.title = (name || 'Kundali') + ' - Vedic Report';
+      console.log('✓ Report loaded successfully. HTML length:', reportHTML.length);
+      console.log('Report content available:', {
+        hasCharts: reportHTML.includes('k-charts'),
+        hasPanchang: reportHTML.includes('Panchang'),
+        hasYoga: reportHTML.includes('Yoga'),
+        hasLucky: reportHTML.includes('Lucky'),
+        hasDasha: reportHTML.includes('Dasha'),
+        hasDosha: reportHTML.includes('Dosha'),
+        hasRemedies: reportHTML.includes('Remedies')
+      });
     } else {
       document.getElementById('reportContent').innerHTML = '<p style="text-align:center;padding:40px;color:#999;">No report data found. Please generate a Kundali first.</p>';
+      console.warn('⚠️ No report data in sessionStorage');
     }
 
     // Download PDF function (for button in report)

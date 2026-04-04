@@ -3840,24 +3840,39 @@
         const b = { day:d, month:mo, year:y, hour:h, min:mi, lat, lon, tzone };
         const p = ep => kProxy(ep, b);
 
-        const [birthDet, astroDet, planets, majorDasha, currentDashaAll, currentDasha, subDasha, yoginiDasha, currentYogini, manglik, sadeSati, panchang, yoga, kalsarpa, ascRep, moonRep, sunRep, chartD1, chartD9, chartChalit] = await Promise.all([
+        // ESSENTIAL calls first (group 1)
+        const [birthDet, astroDet, planets, panchang, manglik, sadeSati] = await Promise.all([
           p('birth_details').catch(()=>({})),
           p('astro_details').catch(()=>({})),
           p('planets').catch(()=>[]),
-          p('major_vdasha').catch(()=>[]),
-          p('current_vdasha_all').catch(()=>null),
-          p('current_vdasha').catch(()=>null),
-          p('sub_vdasha').catch(()=>null),
-          p('major_yogini_dasha').catch(()=>null),
-          p('current_yogini_dasha').catch(()=>null),
+          p('basic_panchang').catch(()=>({})),
           p('manglik').catch(()=>({})),
           p('sadhesati_current_status').catch(()=>({})),
-          p('basic_panchang').catch(()=>({})),
+        ]);
+
+        // Wait a bit, then DASHA calls (group 2)
+        await new Promise(r => setTimeout(r, 1000));
+        const [majorDasha, currentDashaAll, subDasha] = await Promise.all([
+          p('major_vdasha').catch(()=>[]),
+          p('current_vdasha_all').catch(()=>null),
+          p('sub_vdasha').catch(()=>null),
+        ]);
+
+        // Wait a bit, then REPORTS & CHARTS (group 3)
+        await new Promise(r => setTimeout(r, 1000));
+        const [yoginiDasha, currentYogini, yoga, kalsarpa, ascRep, moonRep, sunRep] = await Promise.all([
+          p('major_yogini_dasha').catch(()=>null),
+          p('current_yogini_dasha').catch(()=>null),
           p('yoga_details').catch(()=>null),
           p('kalsarpa_details').catch(()=>null),
           p('ascendant_report').catch(()=>null),
           p('planet_report/moon').catch(()=>null),
           p('planet_report/sun').catch(()=>null),
+        ]);
+
+        // Wait a bit, then CHARTS (group 4 - least critical)
+        await new Promise(r => setTimeout(r, 1000));
+        const [chartD1, chartD9, chartChalit] = await Promise.all([
           p('horo_chart_image/D1').catch(()=>null),
           p('horo_chart_image/D9').catch(()=>null),
           p('horo_chart_image/chalit').catch(()=>null),
@@ -3865,16 +3880,40 @@
 
         // DEBUG: Log all API responses to see what we're getting
         console.log('=== ALL API RESPONSES ===');
+        console.log('birthDet:', birthDet);
+        console.log('astroDet:', astroDet);
+        console.log('planets:', planets);
+        console.log('panchang:', panchang);
+        console.log('majorDasha:', majorDasha);
         console.log('currentDashaAll:', currentDashaAll);
         console.log('currentDasha:', currentDasha);
         console.log('currentYogini:', currentYogini);
         console.log('yoginiDasha:', yoginiDasha);
+        console.log('yoga:', yoga);
         console.log('=== END API LOG ===');
 
         const rashi  = kVal(astroDet, 'moon_sign','rashi') || 'Aries';
         const lagna  = kVal(astroDet, 'rising_sign','ascendant','lagna');
         const nak    = kVal(astroDet, 'nakshatra','nakshatra_name');
         const lf     = K_LUCKY[rashi] || K_LUCKY['Aries'];
+
+        // DEBUG Panchang extraction
+        console.log('🔍 PANCHANG DEBUG:');
+        console.log('Raw panchang object:', panchang);
+        console.log('Tithi attempt:', kVal(panchang,'tithi','tithi_name'));
+        console.log('Vara attempt:', kVal(panchang,'vara','day','vaara'));
+        console.log('Yoga attempt:', kVal(panchang,'yoga','yoga_name'));
+        console.log('Karana attempt:', kVal(panchang,'karana','karana_name'));
+
+        // DEBUG Planets extraction
+        console.log('🔍 PLANETS DEBUG:');
+        console.log('Raw planets:', planets);
+        console.log('Planets array count:', kArr(planets,'planets','data').length);
+
+        // DEBUG Dasha extraction
+        console.log('🔍 DASHA DEBUG:');
+        console.log('Raw majorDasha:', majorDasha);
+        console.log('Dasha array count:', kArr(majorDasha,'dashas','major_vdasha','data').length);
         const isManglik  = manglik.isManglik || manglik.manglik_status || manglik.is_manglik;
         const isSS       = sadeSati.inSadeSati || sadeSati.is_in_sade_sati;
         const isKS       = kalsarpa && (kalsarpa.present || kalsarpa.kalsarpa_present);
