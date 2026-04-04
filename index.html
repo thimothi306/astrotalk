@@ -3545,7 +3545,8 @@
       if (!dobRaw)  errs.push('Date of Birth required');
       if (!tobRaw)  errs.push('Time of Birth required');
       if (!city)    errs.push('City required — type and select from dropdown');
-      if (isNaN(lat)) errs.push('Please select a city from the dropdown list');
+      if (!kSelectedCity) errs.push('Please select a city from the dropdown suggestions (do not just type)');
+      if (isNaN(lat) || isNaN(lon) || isNaN(tzone)) errs.push('Location coordinates invalid — select from dropdown');
       if (errs.length) { errEl.textContent = errs.join(' • '); errEl.style.display = 'block'; return; }
 
       const [y, mo, d] = dobRaw.split('-').map(Number);
@@ -3559,12 +3560,16 @@
         const b = { day:d, month:mo, year:y, hour:h, min:mi, lat, lon, tzone };
         const p = ep => kProxy(ep, b);
 
-        const [birthDet, astroDet, planets, dasha, subDasha, manglik, sadeSati, panchang, yoga, kalsarpa, ascRep, moonRep, sunRep, chartD1, chartD9, chartChalit] = await Promise.all([
+        const [birthDet, astroDet, planets, majorDasha, currentDashaAll, currentDasha, subDasha, yoginiDasha, currentYogini, manglik, sadeSati, panchang, yoga, kalsarpa, ascRep, moonRep, sunRep, chartD1, chartD9, chartChalit] = await Promise.all([
           p('birth_details').catch(()=>({})),
           p('astro_details').catch(()=>({})),
           p('planets').catch(()=>[]),
           p('major_vdasha').catch(()=>[]),
+          p('current_vdasha_all').catch(()=>null),
+          p('current_vdasha').catch(()=>null),
           p('sub_vdasha').catch(()=>null),
+          p('major_yogini_dasha').catch(()=>null),
+          p('current_yogini_dasha').catch(()=>null),
           p('manglik').catch(()=>({})),
           p('sadhesati_current_status').catch(()=>({})),
           p('basic_panchang').catch(()=>({})),
@@ -3681,6 +3686,19 @@
             </table>
           </div>
 
+          <!-- Current Vimshottari Dasha -->
+          ${currentDashaAll?`
+          <div class="k-section">📅 Current Vimshottari Dasha (Complete)</div>
+          <div class="k-card">
+            <p style="color:#555;font-size:.9em;margin-bottom:12px;"><strong>All Current Dasha Periods:</strong></p>
+            ${kArr(currentDashaAll,'current_dasha','current_periods','data').map(cd=>`
+              <div style="background:#f9f6ff;padding:10px 12px;margin-bottom:8px;border-radius:6px;border-left:4px solid var(--dark);">
+                <strong>${kVal(cd,'dasha_name','name')}</strong> →
+                ${kVal(cd,'start_date','start')} to ${kVal(cd,'end_date','end')}
+                <span style="color:#888;font-size:.85em;">(${kVal(cd,'duration','years')} yrs)</span>
+              </div>`).join('')}
+          </div>` : ''}
+
           <!-- Antardasha -->
           ${subDasha&&kArr(subDasha,'sub_periods','antardashas','data').length?`
           <div class="k-section">📅 Antardasha (Sub-Periods)</div>
@@ -3695,6 +3713,33 @@
               </tr>`).join('')}</tbody>
             </table>
           </div>`:''}
+
+          <!-- Yogini Dasha -->
+          ${yoginiDasha?`
+          <div class="k-section">🌸 Major Yogini Dasha</div>
+          <div class="k-card" style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Yogini Dasha Lord</th><th>Start Date</th><th>End Date</th><th>Duration</th></tr></thead>
+              <tbody>${kArr(yoginiDasha,'dashas','yogini_dashas','data').map(yd=>`<tr>
+                <td><strong>${kVal(yd,'lord','name','dasha_name')}</strong></td>
+                <td>${kVal(yd,'startDate','start_date','start')}</td>
+                <td>${kVal(yd,'endDate','end_date','end')}</td>
+                <td>${kVal(yd,'years','duration','period')} yrs</td>
+              </tr>`).join('')}</tbody>
+            </table>
+          </div>` : ''}
+
+          <!-- Current Yogini Dasha -->
+          ${currentYogini?`
+          <div class="k-section">🌸 Current Yogini Dasha</div>
+          <div class="k-card">
+            <div class="k-grid">
+              <div class="k-item"><div class="k-label">Current Yogini Dasha</div><div class="k-value">${kVal(currentYogini,'dasha_name','name')}</div></div>
+              <div class="k-item"><div class="k-label">Start Date</div><div class="k-value">${kVal(currentYogini,'start_date','start')}</div></div>
+              <div class="k-item"><div class="k-label">End Date</div><div class="k-value">${kVal(currentYogini,'end_date','end')}</div></div>
+              <div class="k-item"><div class="k-label">Duration</div><div class="k-value">${kVal(currentYogini,'duration','years','period')} yrs</div></div>
+            </div>
+          </div>` : ''}
 
           <!-- Dosha Analysis -->
           <div class="k-section">⚠️ Dosha Analysis</div>
@@ -3731,8 +3776,10 @@
           <div class="k-card"><p class="k-report-text">${kVal(sunRep,'report','description','result','sun_report')}</p></div>`:''}
 
           <!-- Lucky Factors -->
-          <div class="k-section">🍀 Lucky Factors for ${rashi}</div>
-          <div class="k-card"><div class="k-grid">
+          <div class="k-section">🍀 Lucky Factors for ${rashi} Rashi</div>
+          <div class="k-card">
+            <p style="color:#888;font-size:.85em;margin-bottom:12px;"><em>Note: Lucky factors are based on your Rashi (Moon Sign). All people born under ${rashi} Rashi share these auspicious numbers, colors, and gemstones according to Vedic astrology.</em></p>
+            <div class="k-grid">
             <div class="k-item"><div class="k-label">🔢 Lucky Numbers</div><div class="k-value">${lf.num}</div></div>
             <div class="k-item"><div class="k-label">🎨 Lucky Colors</div><div class="k-value">${lf.color}</div></div>
             <div class="k-item"><div class="k-label">💎 Lucky Gemstone</div><div class="k-value">${lf.gem}</div></div>
