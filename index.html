@@ -3468,16 +3468,34 @@
         showToast('❌ Report not found');
         return;
       }
+      showToast('📄 Generating PDF...');
       const opt = {
         margin: [10, 10, 10, 10],
         filename: `${name}_Kundali_${new Date().getFullYear()}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, allowTaint: true, useCORS: true },
+        html2canvas: {
+          scale: 2,
+          allowTaint: true,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff'
+        },
         jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
       };
-      html2pdf().set(opt).from(element).save().catch(() => {
-        showToast('❌ Error generating PDF. Try again.');
-      });
+      // Use slight delay to ensure SVG charts are rendered before PDF generation
+      setTimeout(() => {
+        html2pdf()
+          .set(opt)
+          .from(element)
+          .save()
+          .then(() => {
+            showToast('✅ PDF downloaded successfully!');
+          })
+          .catch((err) => {
+            console.error('PDF generation error:', err);
+            showToast('❌ PDF generation failed. Please try again.');
+          });
+      }, 300);
     }
 
     /* ══ KUNDALI API ══ */
@@ -3912,6 +3930,7 @@
         `;
 
         document.getElementById('kundaliLoading').classList.remove('visible');
+        document.getElementById('kundaliImages').style.display = 'none';
         document.getElementById('kundaliReport').style.display = 'block';
         document.getElementById('kundaliReport').scrollIntoView({ behavior:'smooth', block:'start' });
         showToast('✨ Kundali generated for ' + name + '!');
