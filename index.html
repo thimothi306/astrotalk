@@ -2440,8 +2440,22 @@
 
     /* ── PRINT STYLES FOR PDF ── */
     @media print {
-      body {
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      html, body {
+        width: 100%;
+        height: 100%;
         background: white;
+      }
+      /* Hide everything except report */
+      body > * {
+        display: none !important;
+      }
+      /* Show only kundali section */
+      #kundali {
+        display: block !important;
       }
       #kundaliReport {
         display: block !important;
@@ -2450,11 +2464,39 @@
         display: block !important;
         width: 100% !important;
         margin: 0 !important;
-        padding: 0 !important;
+        padding: 20px !important;
         background: white !important;
       }
+      /* Hide all sections except report */
+      #kundali > * {
+        display: none !important;
+      }
+      #kundali .container {
+        display: block !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+      #kundali .kundali-wrap {
+        display: block !important;
+        flex: none !important;
+        gap: 0 !important;
+      }
+      #kundali .kundali-form-box {
+        display: none !important;
+      }
+      #kundali .kundali-result-box {
+        display: block !important;
+        flex: none !important;
+        min-width: auto !important;
+      }
+      #kundaliImages {
+        display: none !important;
+      }
+      #kundaliLoading {
+        display: none !important;
+      }
       /* Hide download button in print */
-      #reportPrintable + div button {
+      #reportPrintable + div {
         display: none !important;
       }
       /* Ensure charts display properly */
@@ -2463,14 +2505,35 @@
       }
       #kundaliReport .k-card {
         page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      #kundaliReport .k-section {
+        page-break-inside: avoid;
       }
       #kundaliReport table {
         width: 100% !important;
+        border-collapse: collapse;
+      }
+      #kundaliReport thead {
+        display: table-header-group;
+      }
+      #kundaliReport tbody tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
       }
       /* Remove shadows and animations in print */
       #kundaliReport * {
         box-shadow: none !important;
         animation: none !important;
+        text-shadow: none !important;
+      }
+      /* Optimize fonts for print */
+      #kundaliReport {
+        color: black;
+        font-size: 11pt;
+      }
+      #kundaliReport .section-title {
+        font-size: 16pt;
       }
     }
   </style>
