@@ -3437,6 +3437,7 @@
     // ── Live city search via OpenStreetMap Nominatim (any city worldwide) ──
     let kSearchTimer = null;
     let kSelectedCity = null; // stores { name, lat, lon, tz }
+    let kProgrammaticSet = false; // flag to prevent input event when we set value programmatically
 
     function tzFromLon(lon) {
       // Approximate timezone offset from longitude
@@ -3444,12 +3445,23 @@
     }
 
     document.getElementById('k-city').addEventListener('input', function() {
+      // Ignore if we're programmatically setting the value
+      if (kProgrammaticSet) {
+        kProgrammaticSet = false;
+        return;
+      }
+
       const q = this.value.trim();
       const box = document.getElementById('k-city-suggestions');
-      kSelectedCity = null;
-      document.getElementById('k-lat').value = '';
-      document.getElementById('k-lon').value = '';
-      document.getElementById('k-tz').value = '';
+
+      // Only reset if user is typing something different from selected city
+      if (kSelectedCity && q !== kSelectedCity.name) {
+        kSelectedCity = null;
+        document.getElementById('k-lat').value = '';
+        document.getElementById('k-lon').value = '';
+        document.getElementById('k-tz').value = '';
+      }
+
       if (q.length < 2) { box.style.display = 'none'; return; }
       clearTimeout(kSearchTimer);
       kSearchTimer = setTimeout(() => kSearchCity(q), 350);
@@ -3501,12 +3513,18 @@
       console.log('kSelectCity clicked:', { label, lat, lon, tz, latStr, lonStr, tzStr });
       // Use short name (first part before comma)
       const shortName = label.split(',')[0].trim();
+
+      // Set the flag to prevent input event from resetting our selection
+      kProgrammaticSet = true;
       document.getElementById('k-city').value = shortName;
       document.getElementById('k-lat').value  = lat;
       document.getElementById('k-lon').value  = lon;
       document.getElementById('k-tz').value   = tz;
       document.getElementById('k-city-suggestions').style.display = 'none';
+
+      // Set selected city AFTER updating inputs
       kSelectedCity = { name: shortName, fullName: label, lat, lon, tz };
+      console.log('✅ City selected properly:', { shortName, lat, lon, tz });
     }
 
     const K_LUCKY = {
