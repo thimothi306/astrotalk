@@ -1542,9 +1542,12 @@
     #kundaliReport tbody tr { border-bottom:1px solid var(--lavender); }
     #kundaliReport tbody tr:hover { background:#f9f6ff; }
     #kundaliReport tbody td { padding:9px 12px; }
-    #kundaliReport .k-charts { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; text-align:center; }
-    #kundaliReport .k-chart-box h4 { font-family:'Cinzel',serif; font-size:.9em; color:var(--dark); margin-bottom:8px; }
-    #kundaliReport .k-chart-box div { border:2px solid var(--lavender); border-radius:10px; overflow:hidden; }
+    #kundaliReport .k-charts { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; text-align:center; }
+    #kundaliReport .k-chart-box { padding:16px; background:#f9f6ff; border-radius:12px; }
+    #kundaliReport .k-chart-box h4 { font-family:'Cinzel',serif; font-size:1em; color:var(--dark); margin-bottom:12px; font-weight:700; }
+    #kundaliReport .k-chart-box > div { border:2px solid var(--lavender); border-radius:10px; overflow:hidden; background:#fff; padding:8px; }
+    @media (max-width:1200px) { #kundaliReport .k-charts { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:768px) { #kundaliReport .k-charts { grid-template-columns:1fr; } }
     #kundaliReport .k-yoga { border-left:4px solid var(--orange); background:#fff8f0; border-radius:8px; padding:10px 14px; margin-bottom:8px; }
     #kundaliReport .k-yoga strong { color:var(--dark); }
     #kundaliReport .k-yoga p { font-size:.85em; color:#555; margin-top:3px; line-height:1.5; }
@@ -2435,6 +2438,8 @@
       animation: shimmer 2.5s infinite;
     }
   </style>
+  <!-- HTML2PDF Library for PDF Download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
 </head>
 
 <body>
@@ -3454,15 +3459,25 @@
 
     // ── Download Kundali as PDF ──
     function downloadKundaliPDF(name) {
+      if (typeof html2pdf === 'undefined') {
+        showToast('⚠️ PDF library loading... Please try again in a moment');
+        return;
+      }
       const element = document.getElementById('reportPrintable');
+      if (!element) {
+        showToast('❌ Report not found');
+        return;
+      }
       const opt = {
         margin: [10, 10, 10, 10],
         filename: `${name}_Kundali_${new Date().getFullYear()}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
+        html2canvas: { scale: 2, allowTaint: true, useCORS: true },
         jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
       };
-      html2pdf().set(opt).from(element).save();
+      html2pdf().set(opt).from(element).save().catch(() => {
+        showToast('❌ Error generating PDF. Try again.');
+      });
     }
 
     /* ══ KUNDALI API ══ */
