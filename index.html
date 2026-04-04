@@ -3608,6 +3608,14 @@
           p('horo_chart_image/chalit').catch(()=>null),
         ]);
 
+        // DEBUG: Log all API responses to see what we're getting
+        console.log('=== ALL API RESPONSES ===');
+        console.log('currentDashaAll:', currentDashaAll);
+        console.log('currentDasha:', currentDasha);
+        console.log('currentYogini:', currentYogini);
+        console.log('yoginiDasha:', yoginiDasha);
+        console.log('=== END API LOG ===');
+
         const rashi  = kVal(astroDet, 'moon_sign','rashi') || 'Aries';
         const lagna  = kVal(astroDet, 'rising_sign','ascendant','lagna');
         const nak    = kVal(astroDet, 'nakshatra','nakshatra_name');
@@ -3712,7 +3720,7 @@
           </div>
 
           <!-- Current Vimshottari Dasha -->
-          ${currentDashaAll?`
+          ${currentDashaAll && kArr(currentDashaAll,'current_dasha','current_periods','data').length > 0?`
           <div class="k-section">📅 Current Vimshottari Dasha (Complete)</div>
           <div class="k-card">
             <p style="color:#555;font-size:.9em;margin-bottom:12px;"><strong>All Current Dasha Periods:</strong></p>
@@ -3740,7 +3748,7 @@
           </div>`:''}
 
           <!-- Yogini Dasha -->
-          ${yoginiDasha?`
+          ${yoginiDasha && kArr(yoginiDasha,'dashas','yogini_dashas','data').length > 0?`
           <div class="k-section">🌸 Major Yogini Dasha</div>
           <div class="k-card" style="overflow-x:auto;">
             <table>
@@ -3755,7 +3763,7 @@
           </div>` : ''}
 
           <!-- Current Yogini Dasha -->
-          ${currentYogini?`
+          ${currentYogini && kVal(currentYogini,'dasha_name','name')?`
           <div class="k-section">🌸 Current Yogini Dasha</div>
           <div class="k-card">
             <div class="k-grid">

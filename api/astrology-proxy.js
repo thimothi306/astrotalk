@@ -9,14 +9,15 @@ export default async function handler(req, res) {
   try {
     const { endpoint, data } = req.body;
 
+    // Note: Some endpoints like current_vdasha_all might not be available or might need different params
+    // These are the endpoints we know work from AstrologyAPI
     const allowed = [
       'birth_details','astro_details','planets',
-      'major_vdasha','current_vdasha_all','current_vdasha','current_vdasha_date','sub_vdasha','sub_vdasha/:md',
-      'sub_sub_vdasha/:md/:ad','sub_sub_sub_vdasha/:md/:ad/:pd','sub_sub_sub_sub_vdasha/:md/:ad/:pd/:sd',
-      'major_yogini_dasha','current_yogini_dasha','sub_yogini_dasha','sub_yogini_dasha/:dashaCycle/:dashaName',
+      'major_vdasha','current_vdasha','current_vdasha_date',
+      'sub_vdasha',
+      'major_yogini_dasha','current_yogini_dasha',
       'manglik','sadhesati_current_status','basic_panchang','kalsarpa_details',
       'yoga_details','ascendant_report','planet_report/moon','planet_report/sun',
-      'sun_sign_prediction/daily/:zodiacName',
       'horo_chart_image/D1','horo_chart_image/D9','horo_chart_image/chalit'
     ];
 
