@@ -2450,6 +2450,8 @@
         width: 100%;
         height: 100%;
         background: white;
+        margin: 0 !important;
+        padding: 0 !important;
       }
       /* Hide everything except report */
       body > * {
@@ -2466,7 +2468,7 @@
         display: block !important;
         width: 100% !important;
         margin: 0 !important;
-        padding: 15px !important;
+        padding: 10px !important;
         background: white !important;
       }
       /* PDF Header - Sanathan Ethics Branding */
@@ -2515,17 +2517,17 @@
       }
       /* Section styles - clear and readable */
       #kundaliReport .k-section {
-        font-size: 12pt !important;
-        margin: 16px 0 10px 0 !important;
-        padding-bottom: 8px !important;
+        font-size: 11pt !important;
+        margin: 10px 0 6px 0 !important;
+        padding-bottom: 4px !important;
         border-bottom: 2px solid var(--lavender) !important;
         font-weight: bold;
         color: var(--dark);
         page-break-inside: avoid;
       }
       #kundaliReport .k-card {
-        margin: 0 0 12px 0 !important;
-        padding: 12px !important;
+        margin: 0 0 10px 0 !important;
+        padding: 10px !important;
         page-break-inside: avoid;
         break-inside: avoid;
         background: white !important;
@@ -2550,37 +2552,51 @@
         font-weight: bold;
         color: #222;
       }
-      /* Charts - Full visibility */
+      /* Charts - Better print layout */
       #kundaliReport .k-charts {
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 15px !important;
+        grid-template-columns: 1fr 1fr 1fr !important;
+        gap: 8px !important;
         page-break-inside: avoid;
+        margin: 0 !important;
       }
       #kundaliReport .k-chart-box {
-        padding: 12px !important;
+        padding: 8px !important;
         margin: 0 !important;
         background: #f9f6ff;
-        border: 2px solid var(--lavender);
-        border-radius: 8px;
+        border: 1px solid var(--lavender);
+        border-radius: 4px;
+        page-break-inside: avoid;
       }
       #kundaliReport .k-chart-box h4 {
-        font-size: 11pt !important;
-        margin-bottom: 10px !important;
+        font-size: 10pt !important;
+        margin: 0 0 6px 0 !important;
         font-weight: bold;
         text-align: center;
       }
       #kundaliReport .k-chart-box > div {
-        padding: 8px !important;
+        padding: 4px !important;
         background: white;
         border: 1px solid var(--lavender);
-        border-radius: 6px;
-        min-height: 200px;
+        border-radius: 4px;
+        overflow: hidden !important;
+        height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       #kundaliReport .k-chart-box svg {
         width: 100% !important;
-        height: auto !important;
+        height: 100% !important;
         max-width: 100% !important;
         display: block !important;
+        object-fit: contain !important;
+        overflow: visible !important;
+      }
+      #kundaliReport .k-chart-box img {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        object-fit: contain !important;
       }
       /* Tables - Clear and readable */
       #kundaliReport table {
