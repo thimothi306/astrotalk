@@ -275,7 +275,12 @@
       body > * {
         display: block !important;
       }
-      .print-btn, .close-btn, .report-footer {
+      /* Hide non-report elements */
+      script, style, .print-btn, .close-btn, .report-footer {
+        display: none !important;
+      }
+      /* Only show report content */
+      body > script {
         display: none !important;
       }
       #reportContent {
@@ -292,6 +297,11 @@
         margin-bottom: 15px;
         border-bottom: 3px solid var(--dark);
         padding-bottom: 10px;
+      }
+      /* Hide empty sections */
+      .k-section:has(+ .k-card:empty),
+      .k-card:empty {
+        display: none !important;
       }
       .report-header {
         margin-bottom: 12px !important;
@@ -487,16 +497,21 @@
     if (reportHTML) {
       document.getElementById('reportContent').innerHTML = reportHTML;
       document.title = (name || 'Kundali') + ' - Vedic Report';
-      console.log('✓ Report loaded successfully. HTML length:', reportHTML.length);
-      console.log('Report content available:', {
-        hasCharts: reportHTML.includes('k-charts'),
-        hasPanchang: reportHTML.includes('Panchang'),
-        hasYoga: reportHTML.includes('Yoga'),
-        hasLucky: reportHTML.includes('Lucky'),
-        hasDasha: reportHTML.includes('Dasha'),
-        hasDosha: reportHTML.includes('Dosha'),
-        hasRemedies: reportHTML.includes('Remedies')
-      });
+
+      // Remove empty sections
+      setTimeout(() => {
+        const sections = document.querySelectorAll('.k-section');
+        sections.forEach(section => {
+          const nextCard = section.nextElementSibling;
+          if (nextCard && nextCard.classList.contains('k-card')) {
+            const text = nextCard.innerText.trim();
+            if (!text || text === '-' || text.length < 5) {
+              section.style.display = 'none';
+              nextCard.style.display = 'none';
+            }
+          }
+        });
+      }, 100);
     } else {
       document.getElementById('reportContent').innerHTML = '<p style="text-align:center;padding:40px;color:#999;">No report data found. Please generate a Kundali first.</p>';
       console.warn('⚠️ No report data in sessionStorage');
