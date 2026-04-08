@@ -494,8 +494,7 @@
   </style>
 </head>
 <body>
-  <button class="close-btn" onclick="window.close()">✕ Close</button>
-  <button class="print-btn" onclick="window.print()">📄 Print / Save PDF</button>
+  <button class="print-btn" onclick="downloadReportPDF()">📥 Download Report as PDF</button>
 
   <div class="container">
     <div id="reportContent"></div>
@@ -559,9 +558,28 @@
       console.warn('⚠️ No report data in sessionStorage');
     }
 
-    // Download PDF function (for button in report)
-    function downloadKundaliPDF(nameParam) {
-      window.print();
+    // Download report as PDF with username
+    async function downloadReportPDF() {
+      const name = sessionStorage.getItem('kundaliName') || 'Kundali';
+      const reportContent = document.getElementById('reportContent');
+
+      // Use html2pdf for proper PDF download
+      const element = reportContent;
+      const opt = {
+        margin: 8,
+        filename: `${name}_Vedic_Kundali_Report.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      // Load html2pdf library
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+      script.onload = () => {
+        html2pdf().set(opt).from(element).save();
+      };
+      document.head.appendChild(script);
     }
   </script>
 </body>
