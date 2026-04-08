@@ -298,10 +298,13 @@
         border-bottom: 3px solid var(--dark);
         padding-bottom: 10px;
       }
-      /* Hide empty sections */
-      .k-section:has(+ .k-card:empty),
+      /* Hide empty sections entirely */
+      .k-section:empty,
       .k-card:empty {
         display: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: 0 !important;
       }
       .report-header {
         margin-bottom: 12px !important;
@@ -498,17 +501,37 @@
       document.getElementById('reportContent').innerHTML = reportHTML;
       document.title = (name || 'Kundali') + ' - Vedic Report';
 
-      // Remove empty sections
+      // Remove empty/blank sections
       setTimeout(() => {
+        // Find all section+card pairs
         const sections = document.querySelectorAll('.k-section');
         sections.forEach(section => {
           const nextCard = section.nextElementSibling;
           if (nextCard && nextCard.classList.contains('k-card')) {
             const text = nextCard.innerText.trim();
-            if (!text || text === '-' || text.length < 5) {
+            const hasContent = text && text !== '-' && text.length > 3 && !text.match(/^\s*$/);
+
+            if (!hasContent) {
               section.style.display = 'none';
+              section.style.margin = '0';
+              section.style.padding = '0';
+              section.style.height = '0';
               nextCard.style.display = 'none';
+              nextCard.style.margin = '0';
+              nextCard.style.padding = '0';
+              nextCard.style.height = '0';
             }
+          }
+        });
+
+        // Also hide any k-cards that have no siblings (orphaned)
+        document.querySelectorAll('.k-card').forEach(card => {
+          const text = card.innerText.trim();
+          if (!text || text === '-') {
+            card.style.display = 'none';
+            card.style.margin = '0';
+            card.style.padding = '0';
+            card.style.height = '0';
           }
         });
       }, 100);
