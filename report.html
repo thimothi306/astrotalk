@@ -305,6 +305,15 @@
         margin: 0 !important;
         padding: 0 !important;
         height: 0 !important;
+        visibility: hidden !important;
+      }
+      /* Hide elements with display:none (JavaScript-hidden) */
+      [style*="display: none"],
+      [style*="height: 0"] {
+        display: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: 0 !important;
       }
       .report-header {
         margin-bottom: 12px !important;
@@ -503,38 +512,48 @@
 
       // Remove empty/blank sections
       setTimeout(() => {
+        const hideElement = (el) => {
+          el.style.display = 'none';
+          el.style.margin = '0';
+          el.style.padding = '0';
+          el.style.height = '0';
+          el.style.visibility = 'hidden';
+        };
+
         // Find all section+card pairs
         const sections = document.querySelectorAll('.k-section');
         sections.forEach(section => {
-          const nextCard = section.nextElementSibling;
-          if (nextCard && nextCard.classList.contains('k-card')) {
-            const text = nextCard.innerText.trim();
-            const hasContent = text && text !== '-' && text.length > 3 && !text.match(/^\s*$/);
+          let hasRealContent = false;
+          let nextElement = section.nextElementSibling;
 
-            if (!hasContent) {
-              section.style.display = 'none';
-              section.style.margin = '0';
-              section.style.padding = '0';
-              section.style.height = '0';
-              nextCard.style.display = 'none';
-              nextCard.style.margin = '0';
-              nextCard.style.padding = '0';
-              nextCard.style.height = '0';
+          // Check the next card and hide if empty
+          if (nextElement && nextElement.classList.contains('k-card')) {
+            const text = nextElement.innerText.trim();
+            const hasTable = nextElement.querySelector('table tr');
+            const hasItems = nextElement.querySelector('.k-item:not(:empty)');
+            const hasUl = nextElement.querySelector('ul li');
+
+            // Consider it has content only if: significant text OR table OR items OR list
+            hasRealContent = (text.length > 10) || hasTable || hasItems || hasUl;
+
+            if (!hasRealContent) {
+              hideElement(section);
+              hideElement(nextElement);
             }
           }
         });
 
-        // Also hide any k-cards that have no siblings (orphaned)
+        // Also hide orphaned k-cards with no content
         document.querySelectorAll('.k-card').forEach(card => {
           const text = card.innerText.trim();
-          if (!text || text === '-') {
-            card.style.display = 'none';
-            card.style.margin = '0';
-            card.style.padding = '0';
-            card.style.height = '0';
+          const hasTable = card.querySelector('table');
+          const hasItems = card.querySelector('.k-item');
+
+          if ((!text || text.length < 5) && !hasTable && !hasItems) {
+            hideElement(card);
           }
         });
-      }, 100);
+      }, 150);
     } else {
       document.getElementById('reportContent').innerHTML = '<p style="text-align:center;padding:40px;color:#999;">No report data found. Please generate a Kundali first.</p>';
       console.warn('⚠️ No report data in sessionStorage');
