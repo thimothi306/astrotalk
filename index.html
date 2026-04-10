@@ -3878,9 +3878,66 @@
       }
     };
 
-    function buildYogaSection(yogaList, planets) {
-      const yogas = kArr(yogaList,'yogas','yoga_list','data');
-      if (!yogas.length) return '';
+    // Detect yogas from planetary positions
+    function detectYogasFromPlanets(planetsData) {
+      const pl = kArr(planetsData,'planets','data');
+      if (!pl.length) return [];
+      const found = [];
+
+      const getP = name => pl.find(p => (kVal(p,'name','planet')||'').toLowerCase().includes(name.toLowerCase()));
+      const house = p => parseInt(kVal(p,'house') || 0);
+      const sign  = p => (kVal(p,'sign','rashi') || '').toLowerCase();
+      const kendras = [1,4,7,10];
+      const isKendra = h => kendras.includes(h);
+      const houseDiff = (a, b) => { const d = Math.abs(house(a)-house(b)); return d > 6 ? 12-d : d; };
+
+      const sun=getP('sun'), moon=getP('moon'), mars=getP('mars'),
+            merc=getP('mercury'), jup=getP('jupiter'), ven=getP('venus'),
+            sat=getP('saturn');
+
+      // Gaj Kesari Yoga: Moon & Jupiter in kendra from each other
+      if (moon && jup && [0,3,6,9].includes(houseDiff(moon,jup)))
+        found.push({ name:'Gaj Kesari Yoga' });
+
+      // Budha Aditya Yoga: Sun & Mercury in same house
+      if (sun && merc && house(sun) === house(merc))
+        found.push({ name:'Budha Aditya Yoga' });
+
+      // Chandra Mangal Yoga: Moon & Mars conjunct or 7th from each other
+      if (moon && mars && [0,6].includes(houseDiff(moon,mars)))
+        found.push({ name:'Chandra Mangal Yoga' });
+
+      // Hans Yoga: Jupiter in kendra in own/exalted sign (Cancer or Sagittarius or Pisces)
+      if (jup && isKendra(house(jup)) && ['cancer','sagittarius','pisces'].some(s=>sign(jup).includes(s)))
+        found.push({ name:'Hans Yoga' });
+
+      // Malavya Yoga: Venus in kendra in own/exalted sign (Taurus, Libra, Pisces)
+      if (ven && isKendra(house(ven)) && ['taurus','libra','pisces'].some(s=>sign(ven).includes(s)))
+        found.push({ name:'Malavya Yoga' });
+
+      // Ruchaka Yoga: Mars in kendra in own/exalted sign (Aries, Scorpio, Capricorn)
+      if (mars && isKendra(house(mars)) && ['aries','scorpio','capricorn'].some(s=>sign(mars).includes(s)))
+        found.push({ name:'Ruchaka Yoga' });
+
+      // Shasha Yoga: Saturn in kendra in own/exalted sign (Capricorn, Aquarius, Libra)
+      if (sat && isKendra(house(sat)) && ['capricorn','aquarius','libra'].some(s=>sign(sat).includes(s)))
+        found.push({ name:'Shasha Yoga' });
+
+      // Raja Yoga: lords of kendra & trikona related (simplified: check Jupiter+Moon in trikona)
+      if (moon && jup && [1,5,9].includes(house(jup)))
+        found.push({ name:'Raja Yoga' });
+
+      // Dhana Yoga: Venus & Jupiter together or in 2nd/11th
+      if (ven && jup && house(ven) === house(jup))
+        found.push({ name:'Dhana Yoga' });
+
+      return found;
+    }
+
+    function buildYogaSection(yogaList, planetsData) {
+      // Try API first, fall back to calculated yogas
+      let yogas = yogaList ? kArr(yogaList,'yogas','yoga_list','data') : [];
+      if (!yogas.length) yogas = detectYogasFromPlanets(planetsData);
       let html = `
         <div class="k-section">✨ Good Combinations Present in Your Horoscope</div>
         <div class="k-card">
@@ -4152,7 +4209,7 @@
           </div>
 
           <!-- Yoga Analysis - ParamDhaam style -->
-          ${yoga ? buildYogaSection(yoga, planets) : ''}
+          ${buildYogaSection(yoga, planets)}
 
           <!-- Vimshottari Dasha - ParamDhaam style complete table -->
           ${buildVimshottariTable(kArr(majorDasha,'dashas','major_vdasha','data'))}
