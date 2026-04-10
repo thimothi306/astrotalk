@@ -215,6 +215,27 @@
       font-size: 0.8em;
     }
 
+    .full-pdf-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1000;
+      background: linear-gradient(135deg, #c9920a, #e6b31e);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(201,146,10,0.4);
+      transition: all 0.3s;
+    }
+    .full-pdf-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(201,146,10,0.5);
+    }
+
     .print-btn {
       position: fixed;
       bottom: 20px;
@@ -495,11 +516,12 @@
 </head>
 <body>
   <button class="print-btn" onclick="downloadReportPDF()">📥 Download Report as PDF</button>
+  <button class="full-pdf-btn" id="fullPdfBtn" onclick="downloadFullHoroscope()" style="display:none;">📖 Download Complete Horoscope PDF</button>
 
   <div class="container">
     <div id="reportContent"></div>
   </div>
-
+  
   <script>
     // Read report from sessionStorage
     const reportHTML = sessionStorage.getItem('kundaliReport');
@@ -556,6 +578,22 @@
     } else {
       document.getElementById('reportContent').innerHTML = '<p style="text-align:center;padding:40px;color:#999;">No report data found. Please generate a Kundali first.</p>';
       console.warn('⚠️ No report data in sessionStorage');
+    }
+
+    // Show complete horoscope PDF button if URL exists
+    const pdfUrl = sessionStorage.getItem('horoscopePdfUrl');
+    if (pdfUrl) {
+      document.getElementById('fullPdfBtn').style.display = 'block';
+    }
+
+    // Download complete horoscope from AstrologyAPI
+    function downloadFullHoroscope() {
+      const url = sessionStorage.getItem('horoscopePdfUrl');
+      if (url) {
+        window.open(url, '_blank');
+      } else {
+        alert('Complete horoscope PDF is still generating. Please wait a moment and try again.');
+      }
     }
 
     // Download report as PDF with username

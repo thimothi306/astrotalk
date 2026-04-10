@@ -1,5 +1,6 @@
 const API_KEY = 'ak-d9ddc4d6258acfae3fe78035643131e65229408c';
 const API_BASE = 'https://json.astrologyapi.com/v1';
+const PDF_BASE = 'https://pdf.astrologyapi.com/v1';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -9,12 +10,25 @@ export default async function handler(req, res) {
   try {
     const { endpoint, data } = req.body;
 
-    // Note: Some endpoints like current_vdasha_all might not be available or might need different params
-    // These are the endpoints we know work from AstrologyAPI
+    // PDF horoscope endpoint - different base URL
+    if (endpoint === 'basic_horoscope_pdf') {
+      const response = await fetch(`${PDF_BASE}/basic_horoscope_pdf`, {
+        method: 'POST',
+        headers: {
+          'x-astrologyapi-key': API_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (!response.ok) return res.status(response.status).json({ error: result.message || 'PDF API Error' });
+      return res.status(200).json(result);
+    }
+
     const allowed = [
       'birth_details','astro_details','planets',
       'major_vdasha','current_vdasha','current_vdasha_date',
-      'sub_vdasha',
+      'sub_vdasha','current_vdasha_all',
       'major_yogini_dasha','current_yogini_dasha',
       'manglik','sadhesati_current_status','basic_panchang','kalsarpa_details',
       'yoga_details','ascendant_report','planet_report/moon','planet_report/sun',

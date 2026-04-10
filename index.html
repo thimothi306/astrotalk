@@ -4175,6 +4175,25 @@
         document.getElementById('kundaliLoading').classList.remove('visible');
         document.getElementById('kundaliImages').style.display = 'none';
 
+        // Generate full PDF horoscope in background
+        const pdfData = {
+          day: d, month: mo, year: y,
+          hour: h, min: mi,
+          lat, lon, tzone,
+          name, gender: 'male',
+          birth_place: fullLocation,
+          company_name: 'Sanathan Ethics',
+          report_language: 'en'
+        };
+        kProxy('basic_horoscope_pdf', pdfData)
+          .then(pdfResult => {
+            if (pdfResult && pdfResult.pdf_url) {
+              sessionStorage.setItem('horoscopePdfUrl', pdfResult.pdf_url);
+              showToast('✅ Complete Horoscope PDF ready!');
+            }
+          })
+          .catch(() => {});
+
         showToast('✨ Opening Kundali report in new window...');
 
         // Open report in new tab
