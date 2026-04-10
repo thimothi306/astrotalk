@@ -3800,6 +3800,150 @@
       console.log('✅ City selected properly:', { shortName, lat, lon, tz });
     }
 
+    // ── VIMSHOTTARI DASHA CALCULATOR ──
+    const VD_YEARS = {Su:6,Mo:10,Ma:7,Ra:18,Ju:16,Sa:19,Me:17,Ke:7,Ve:20};
+    const VD_ORDER = ['Su','Mo','Ma','Ra','Ju','Sa','Me','Ke','Ve'];
+    const VD_FULL  = {Su:'Sun',Mo:'Moon',Ma:'Mars',Ra:'Rahu',Ju:'Jupiter',Sa:'Saturn',Me:'Mercury',Ke:'Ketu',Ve:'Venus'};
+
+    function vdAddDays(date, days) {
+      const d = new Date(date); d.setDate(d.getDate() + Math.round(days)); return d;
+    }
+    function vdFmt(date) {
+      return `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()}`;
+    }
+    function buildCompleteDasha(majorDashaList) {
+      if (!majorDashaList || !majorDashaList.length) return [];
+      const result = [];
+      majorDashaList.forEach(md => {
+        const lordKey = Object.keys(VD_FULL).find(k => VD_FULL[k] === (md.lord||md.planet||md.name) || k === (md.lord||md.planet));
+        if (!lordKey) return;
+        const majorYearsDays = VD_YEARS[lordKey] * 365.25;
+        const startDate = new Date(md.startDate || md.start_date || md.start);
+        const subs = [];
+        const startIdx = VD_ORDER.indexOf(lordKey);
+        let subStart = new Date(startDate);
+        for (let j = 0; j < 9; j++) {
+          const subKey = VD_ORDER[(startIdx + j) % 9];
+          const subDays = (VD_YEARS[subKey] / 120) * majorYearsDays;
+          const subEnd = vdAddDays(subStart, subDays);
+          subs.push({ key: `${lordKey}/${subKey}`, date: vdFmt(subStart) });
+          subStart = new Date(subEnd);
+        }
+        result.push({ lord: lordKey, subs });
+      });
+      return result;
+    }
+
+    // ── YOGA DATABASE ──
+    const YOGA_DB = {
+      'Gaj Kesari Yoga': {
+        title: 'GAJ KESARI YOGA',
+        definition: 'When Moon and Jupiter are placed in Centre from each other i.e. Moon is with Jupiter or 4th or 7th or 10th house from Jupiter then the combination is known as Gaj Kesari Yoga. This yoga is itself equivalent to several Raj yoga and Dhan Yoga. It is also one of the Panch Maha Purush Yoga.',
+        result: 'GAJ KESARI YOGA has been found in your horoscope. You are very lucky that you have this yoga — it is one of the most potent yogas and a person becomes head of institution, work or state. Even if poor, they always remain head of their own work.'
+      },
+      'Hans Yoga': {
+        title: 'HANS YOGA (SWAN YOGA)',
+        definition: 'When Jupiter is placed in Kendra (1st, 4th, 7th or 10th house) and is in its own house or exalted house then it makes Hans Yoga. This is one of the Panch Mahapurush Yoga found in great humans.',
+        result: 'HANS YOGA has been found in your horoscope. It is a blessing of your past life deeds. You are destined to get fame in your society, will be blessed with all kind of comfort in life, and will be regarded as a very holy or honest person.'
+      },
+      'Budha Aditya Yoga': {
+        title: 'BUDHA ADITYA YOGA',
+        definition: 'When Sun and Mercury are placed together in the same house it creates Budha Aditya Yoga. This combination gives sharp intelligence, good communication skills and success in intellectual pursuits.',
+        result: 'BUDHA ADITYA YOGA is present in your horoscope. This gives you sharp intelligence, excellent communication skills, and success in education, business and professional endeavors. You will be known for your wisdom and analytical abilities.'
+      },
+      'Chandra Mangal Yoga': {
+        title: 'CHANDRA MANGAL YOGA',
+        definition: 'When Moon and Mars are placed together or aspect each other, Chandra Mangal Yoga is formed. This yoga gives tremendous energy, courage and financial prosperity.',
+        result: 'CHANDRA MANGAL YOGA is present in your horoscope. This powerful yoga grants you great courage, strong will power and the ability to earn wealth through your own efforts. You will be courageous and determined in all your pursuits.'
+      },
+      'Raja Yoga': {
+        title: 'RAJ YOGA',
+        definition: 'Raj Yoga is formed when lords of Kendra (1,4,7,10) and Trikona (1,5,9) houses are placed together or aspect each other. This yoga gives royal status, power, authority and high position in life.',
+        result: 'RAJ YOGA is present in your horoscope. This indicates a period of great success, recognition and authority in your life. During the dasha of planets forming this yoga, you will rise to prominent positions and enjoy the fruits of power and status.'
+      },
+      'Dhana Yoga': {
+        title: 'DHAN YOGA',
+        definition: 'Dhan Yoga is formed when 2nd and 11th house lords are connected with each other or with the 5th or 9th house lords. This yoga gives immense wealth and financial prosperity.',
+        result: 'DHAN YOGA is present in your horoscope. This indicates significant wealth accumulation in your life. During favorable dasha periods, you will experience financial growth, prosperity and abundance.'
+      },
+      'Pancha Mahapurusha Yoga': {
+        title: 'PANCHA MAHAPURUSHA YOGA',
+        definition: 'This yoga is formed when Mars, Mercury, Jupiter, Venus or Saturn occupy their own or exalted sign in a Kendra house. It makes a person highly distinguished and famous.',
+        result: 'PANCHA MAHAPURUSHA YOGA is present in your horoscope. This is one of the rarest and most powerful yogas, indicating that you are destined for great fame, success and recognition in your field.'
+      },
+      'Neecha Bhanga Raja Yoga': {
+        title: 'NEECHA BHANGA RAJA YOGA',
+        definition: 'When a debilitated planet gets its debilitation cancelled due to specific planetary configurations, it forms Neecha Bhanga Raja Yoga. The cancellation of debilitation gives extraordinary results.',
+        result: 'NEECHA BHANGA RAJA YOGA is present in your horoscope. Despite initial struggles, you will overcome all obstacles and rise to great heights. Your challenges will transform into your greatest strengths.'
+      }
+    };
+
+    function buildYogaSection(yogaList, planets) {
+      const yogas = kArr(yogaList,'yogas','yoga_list','data');
+      if (!yogas.length) return '';
+      let html = `
+        <div class="k-section">✨ Good Combinations Present in Your Horoscope</div>
+        <div class="k-card">
+          <div style="margin-bottom:20px;padding:16px;background:#f9f6ff;border-radius:8px;border-left:4px solid var(--dark);">
+            <h4 style="font-family:'Cinzel',serif;color:var(--dark);margin-bottom:10px;">Meaning of Yoga</h4>
+            <p style="color:#555;font-size:.92em;line-height:1.8;">Yoga means Union or combination. Yogas are the most important part of predictive Vedic astrology. Normally very few people know about the yogas present in their horoscope. A Raj Yoga is a combination related to leadership, high place or a highly regarded person. It can be malefic also if combined with a malefic planet.</p>
+          </div>
+          <div style="margin-bottom:20px;padding:16px;background:#fff8f0;border-radius:8px;border-left:4px solid var(--gold);">
+            <h4 style="font-family:'Cinzel',serif;color:var(--dark);margin-bottom:10px;">Meaning of RAJ YOGA and DHAN YOGA</h4>
+            <p style="color:#555;font-size:.92em;line-height:1.8;">Raj Yoga means combination for royal people and Dhan Yoga means combination for Rich Persons. Without Dhan Yoga, Raj Yoga becomes useless and without Raj Yoga, wealth never becomes much potent to give a good status to the native. Normally each person has about 3 to 7 potent Raj Yogas and 4 to 24 cancellation Raj Yogas. Highly famous and rich people have larger numbers of Raj Yoga and lesser cancellations.</p>
+          </div>`;
+
+      yogas.forEach(yg => {
+        const name = kVal(yg,'name','yoga_name') || '';
+        const desc = kVal(yg,'description','result','effect') || '';
+        const dbKey = Object.keys(YOGA_DB).find(k => name.toLowerCase().includes(k.toLowerCase().split(' ')[0]) || k.toLowerCase().includes(name.toLowerCase().split(' ')[0]));
+        const db = dbKey ? YOGA_DB[dbKey] : null;
+        html += `
+          <div style="margin-bottom:20px;padding:16px;border:1px solid var(--lavender);border-radius:8px;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--dark);font-size:1em;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">${db ? db.title : name}</h4>
+            <p style="color:#444;font-size:.9em;line-height:1.8;margin-bottom:10px;">${db ? db.definition : desc}</p>
+            <p style="color:var(--dark);font-size:.9em;line-height:1.8;font-weight:500;background:#f9f6ff;padding:12px;border-radius:6px;">${db ? db.result : desc}</p>
+          </div>`;
+      });
+
+      html += `</div>`;
+      return html;
+    }
+
+    function buildVimshottariTable(majorDashaList) {
+      const dashas = buildCompleteDasha(majorDashaList);
+      if (!dashas.length) return '';
+      let html = `
+        <div class="k-section">📅 Vimshottari Dasa (Complete Life Periods)</div>
+        <div class="k-card">
+          <p class="k-report-text" style="margin-bottom:16px;">The Vimshottari Dasha system shows your complete life timeline divided into major planetary periods (Mahadasha) and sub-periods (Antardasha). Each period brings the qualities and results of the ruling planet.</p>`;
+
+      dashas.forEach(md => {
+        const rows = [];
+        for (let i = 0; i < md.subs.length; i += 3) {
+          rows.push(md.subs.slice(i, i + 3));
+        }
+        html += `
+          <div style="margin-bottom:20px;">
+            <div style="background:linear-gradient(135deg,var(--dark),#4a3580);color:#fff;padding:8px 14px;border-radius:6px 6px 0 0;font-family:'Cinzel',serif;font-size:.9em;font-weight:700;">
+              ${VD_FULL[md.lord]} Mahadasha (${VD_YEARS[md.lord]} years)
+            </div>
+            <div style="border:1px solid var(--lavender);border-top:none;border-radius:0 0 6px 6px;padding:12px;">
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">`;
+        md.subs.forEach(sub => {
+          const parts = sub.key.split('/');
+          html += `<div style="background:#f9f6ff;padding:8px 10px;border-radius:4px;font-size:.85em;">
+            <span style="color:var(--dark);font-weight:700;">${sub.key}:</span>
+            <span style="color:#555;"> ${sub.date}</span>
+          </div>`;
+        });
+        html += `</div></div></div>`;
+      });
+
+      html += `</div>`;
+      return html;
+    }
+
     const K_LUCKY = {
       'Aries':      {num:'9',color:'Red, Orange',gem:'Red Coral',metal:'Copper',day:'Tuesday',deity:'Hanuman',dir:'South',mantra:'Om Angarakaya Namaha',friend:'Sun, Jupiter',avoid:'Saturn, Venus'},
       'Taurus':     {num:'6',color:'White, Pink',gem:'Diamond',metal:'Silver',day:'Friday',deity:'Lakshmi',dir:'South-East',mantra:'Om Shukraya Namaha',friend:'Mercury, Saturn',avoid:'Sun, Moon'},
@@ -4007,36 +4151,11 @@
             </table>
           </div>
 
-          <!-- Yoga Analysis -->
-          ${yoga?`
-          <div class="k-section">✨ Yoga Analysis</div>
-          <div class="k-card">
-            ${kArr(yoga,'yogas','yoga_list','data').length
-              ? kArr(yoga,'yogas','yoga_list','data').map(yg=>`
-                  <div class="k-yoga">
-                    <strong>${kVal(yg,'name','yoga_name')}</strong>
-                    <p>${kVal(yg,'description','result','effect')}</p>
-                  </div>`).join('')
-              : '<p style="color:#888;font-size:.9em;">No major yogas detected for this chart.</p>'}
-          </div>`:''}
+          <!-- Yoga Analysis - ParamDhaam style -->
+          ${yoga ? buildYogaSection(yoga, planets) : ''}
 
-          <!-- Vimshottari Dasha -->
-          <div class="k-section">📅 Vimshottari Dasha (Major Life Periods)</div>
-          <div class="k-card">
-            <p class="k-report-text">The Vimshottari Dasha system divides your life into planetary periods. Each planet rules a specific timeframe, influencing your life events, opportunities, and challenges. Below are your major life periods:</p>
-            <div style="margin-top:16px;padding:14px;background:#f9f6ff;border-radius:8px;border-left:4px solid var(--dark);">
-              ${kArr(majorDasha,'dashas','major_vdasha','data').map((ds,i)=>`
-                <div style="margin-bottom:12px;${i>0?'border-top:1px solid var(--lavender);padding-top:12px;':''}"
-                  <strong style="color:var(--dark);font-size:1.05em;">${i+1}. ${kVal(ds,'lord','planet','name')} Mahadasha</strong>
-                  <p style="margin:6px 0 0 0;color:#555;font-size:.92em;line-height:1.6;">
-                    <strong>Period:</strong> ${kVal(ds,'startDate','start_date','start')} to ${kVal(ds,'endDate','end_date','end')}<br/>
-                    <strong>Duration:</strong> ${kVal(ds,'years','duration','period')} years<br/>
-                    This is a significant period in your life ruled by ${kVal(ds,'lord','planet','name')}. The characteristics and events during this period will be strongly influenced by the nature and placement of this planet in your birth chart.
-                  </p>
-                </div>
-              `).join('')}
-            </div>
-          </div>
+          <!-- Vimshottari Dasha - ParamDhaam style complete table -->
+          ${buildVimshottariTable(kArr(majorDasha,'dashas','major_vdasha','data'))}
 
           <!-- Current Vimshottari Dasha -->
           ${currentDashaAll && kArr(currentDashaAll,'current_dasha','current_periods','data').length > 0?`
