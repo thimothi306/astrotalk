@@ -124,15 +124,18 @@
     .k-chart-box > div {
       border: 2px solid var(--lavender);
       border-radius: 10px;
-      overflow: visible;
+      overflow: hidden;
       background: #fff;
       padding: 8px;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .k-chart-box svg {
       width: 100%;
-      height: auto;
-      max-width: 100%;
+      height: 100%;
       display: block;
     }
 
@@ -413,16 +416,16 @@
         border: 1px solid var(--lavender);
         border-radius: 4px;
         overflow: hidden !important;
-        min-height: 240px;
-        text-align: center;
+        aspect-ratio: 1 / 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
       }
       .k-chart-box svg {
         width: 100% !important;
-        height: auto !important;
-        max-width: 100% !important;
+        height: 100% !important;
         display: block !important;
         margin: 0 auto !important;
-        overflow: visible !important;
       }
       .k-chart-box img {
         width: 100% !important;
