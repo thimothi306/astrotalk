@@ -1545,8 +1545,8 @@
     #kundaliReport .k-charts { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; text-align:center; }
     #kundaliReport .k-chart-box { padding:16px; background:#f9f6ff; border-radius:12px; }
     #kundaliReport .k-chart-box h4 { font-family:'Cinzel',serif; font-size:1em; color:var(--dark); margin-bottom:12px; font-weight:700; }
-    #kundaliReport .k-chart-box > div { border:2px solid var(--lavender); border-radius:10px; overflow:visible; background:#fff; padding:8px; }
-    #kundaliReport .k-chart-box svg { width:100%; height:auto; max-width:100%; display:block; }
+    #kundaliReport .k-chart-box > div { border:2px solid var(--lavender); border-radius:10px; overflow:hidden; background:#fff; padding:8px; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; }
+    #kundaliReport .k-chart-box svg { width:100%; height:100%; display:block; }
     #kundaliReport .k-chart-box img { width:100%; height:auto; max-width:100%; display:block; }
     @media (max-width:1200px) { #kundaliReport .k-charts { grid-template-columns:repeat(2,1fr); } }
     @media (max-width:768px) { #kundaliReport .k-charts { grid-template-columns:1fr; } }
@@ -3068,19 +3068,9 @@
 
         <!-- Result -->
         <div class="kundali-result-box" id="k-result-box">
-          <!-- Default orbital images shown before report -->
-          <div id="kundaliImages" style="position:relative;width:340px;height:340px;margin:60px auto 0;">
-            <div style="position:absolute;inset:0;border:2px dashed rgba(44,32,85,0.2);border-radius:50%;animation:spinSlow 20s linear infinite;"></div>
-            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80px;height:80px;background:radial-gradient(circle,var(--lavender),var(--gold));border-radius:50%;box-shadow:0 0 30px rgba(44,32,85,0.2);display:flex;align-items:center;justify-content:center;font-size:2rem;">🔮</div>
-            <div style="position:absolute;top:50%;left:50%;width:150px;height:150px;margin:-75px;animation:orbit1 6s linear infinite;">
-              <img src="images/dharma balance.jpeg" style="width:150px;height:150px;border-radius:50%;object-fit:cover;box-shadow:0 8px 24px rgba(44,32,85,0.2);border:3px solid white;animation:counterSpin 6s linear infinite;">
-            </div>
-            <div style="position:absolute;top:50%;left:50%;width:150px;height:150px;margin:-75px;animation:orbit2 6s linear infinite;">
-              <img src="images/tree of wisdom.jpeg" style="width:150px;height:150px;border-radius:50%;object-fit:cover;box-shadow:0 8px 24px rgba(44,32,85,0.2);border:3px solid white;animation:counterSpin 6s linear infinite;">
-            </div>
-            <div style="position:absolute;top:50%;left:50%;width:150px;height:150px;margin:-75px;animation:orbit3 6s linear infinite;">
-              <img src="images/third eye wisdom.jpeg" style="width:150px;height:150px;border-radius:50%;object-fit:cover;box-shadow:0 8px 24px rgba(44,32,85,0.2);border:3px solid white;animation:counterSpin 6s linear infinite;">
-            </div>
+          <!-- Zodiac wheel shown before report -->
+          <div id="kundaliImages" style="width:340px;height:340px;margin:40px auto 0;">
+            <img src="images/zodiac-wheel.jpeg" alt="Zodiac Wheel" style="width:100%;height:100%;object-fit:cover;border-radius:50%;box-shadow:0 8px 32px rgba(44,32,85,0.25);border:3px solid var(--lavender);animation:spinSlow 20s linear infinite;">
           </div>
 
           <!-- Loading -->
@@ -4137,6 +4127,7 @@
         const isSS       = sadeSati.inSadeSati || sadeSati.is_in_sade_sati;
         const isKS       = kalsarpa && (kalsarpa.present || kalsarpa.kalsarpa_present);
         const svgOf = r  => r ? (typeof r==='string' ? r : (r.svg||r.chart_image||r.response||'')) : '';
+        const fixSvg = s => s ? s.replace(/<svg([^>]*)>/, (_,a) => { const w=(a.match(/width="(\d+)"/) ||['','350'])[1]; const h=(a.match(/height="(\d+)"/) ||['','350'])[1]; const vb=a.includes('viewBox')?'':` viewBox="0 0 ${w} ${h}"`; return `<svg${a.replace(/\s*width="\d+"/,'').replace(/\s*height="\d+"/,'')}${vb} width="100%" height="100%">`; }) : '';
 
         const fullLocation = kSelectedCity ? kSelectedCity.fullName : city;
 
@@ -4187,9 +4178,9 @@
           ${(svgOf(chartD1)||svgOf(chartD9)||svgOf(chartChalit)) ? `
           <div class="k-section">🔯 Kundali Charts</div>
           <div class="k-card"><div class="k-charts">
-            ${svgOf(chartD1)?`<div class="k-chart-box"><h4>D1 — Lagna Chart (Birth Chart)</h4><div>${svgOf(chartD1)}</div></div>`:''}
-            ${svgOf(chartD9)?`<div class="k-chart-box"><h4>D9 — Navamsa Chart</h4><div>${svgOf(chartD9)}</div></div>`:''}
-            ${svgOf(chartChalit)?`<div class="k-chart-box"><h4>Chalit — House Chart</h4><div>${svgOf(chartChalit)}</div></div>`:''}
+            ${svgOf(chartD1)?`<div class="k-chart-box"><h4>D1 — Lagna Chart (Birth Chart)</h4><div>${fixSvg(svgOf(chartD1))}</div></div>`:''}
+            ${svgOf(chartD9)?`<div class="k-chart-box"><h4>D9 — Navamsa Chart</h4><div>${fixSvg(svgOf(chartD9))}</div></div>`:''}
+            ${svgOf(chartChalit)?`<div class="k-chart-box"><h4>Chalit — House Chart</h4><div>${fixSvg(svgOf(chartChalit))}</div></div>`:''}
           </div></div>` : ''}
 
           <!-- Planetary Positions -->
